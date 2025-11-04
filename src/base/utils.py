@@ -62,7 +62,7 @@ def find_bot_class(module):
     """
     import inspect
 
-    from resources.base import BaseBot
+    from src.base.bot import BaseBot
 
     klass = [
         obj

@@ -1,4 +1,4 @@
-from resources.core._version import get_versions
+from ._version import get_versions
 
 from .bot import *
 

@@ -15,9 +15,9 @@ import pyperclip
 import win32gui
 from PIL import Image
 
-from resources.base.bot import BaseBot
-from resources.base.state import State
-from resources.base.utils import is_retina, only_if_element
+from src.base.bot import BaseBot
+from src.base.state import State
+from src.base.utils import is_retina, only_if_element
 
 from . import config, cv2find, os_compat
 

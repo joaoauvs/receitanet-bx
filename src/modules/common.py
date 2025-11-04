@@ -1,24 +1,36 @@
+import json
 import logging
+import sys
 import time
 from datetime import datetime
 from functools import wraps
-import json
-import sys
 
-@staticmethod
-def get_message():
-    """Recupera a mensagem do input.
+
+def get_message() -> dict:
+    """
+    Le a mensagem de entrada via stdin (formato JSON).
 
     Returns:
-        dict: Mensagem convertida em dicionário.
+        dict: Payload convertido em dicionario.
     """
     return json.loads(sys.stdin.read())
 
+
 def time_execution(func):
+    """
+    Calcula o tempo de execucao da funcao decorada.
+
+    Args:
+        func (callable): Funcao a ser medida.
+
+    Returns:
+        callable: Funcao decorada.
+    """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         start_time = datetime.now()
-        logging.info(f"🕐 Execution started at: {start_time.strftime('%H:%M:%S')}")
+        logging.info("Execucao iniciada as %s", start_time.strftime("%H:%M:%S"))
 
         result = func(*args, **kwargs)
 
@@ -26,27 +38,51 @@ def time_execution(func):
         elapsed_time = end_time - start_time
         hours, remainder = divmod(elapsed_time.total_seconds(), 3600)
         minutes, seconds = divmod(remainder, 60)
-        logging.info(f"🕑 Execution completed at: {end_time.strftime('%H:%M:%S')}")
-        logging.info(f"🕞 Runtime: {int(hours):02} horas, {int(minutes):02} minutos e {int(seconds):02} segundos.")
+        logging.info("Execucao finalizada as %s", end_time.strftime("%H:%M:%S"))
+        logging.info(
+            "Tempo total: %02d hora(s), %02d minuto(s) e %02d segundo(s)",
+            int(hours),
+            int(minutes),
+            int(seconds),
+        )
 
         return result
+
     return wrapper
 
 
 def attempts(max_attempts=3, waiting_time=1):
+    """
+    Tenta executar a funcao decorada com numero limitado de tentativas.
+
+    Args:
+        max_attempts (int): Numero maximo de tentativas.
+        waiting_time (int | float): Intervalo em segundos entre as tentativas.
+
+    Returns:
+        callable: Funcao decorada.
+    """
+
     def decorador(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            attempt = 1
-            while attempt <= max_attempts:
+            tentativa = 1
+            while tentativa <= max_attempts:
                 try:
-                    logging.info(f"Attempt {attempt} of {max_attempts}.")
+                    logging.info("Tentativa %d de %d.", tentativa, max_attempts)
                     return func(*args, **kwargs)
-                except Exception as e:
-                    logging.info(f"Attempt {attempt} of {max_attempts} failed. Error: {e}")
-                    logging.info(f"Error: {type(e).__name__}, {e.args[0]}")
-                    attempt += 1
+                except Exception as exc:
+                    logging.info(
+                        "Tentativa %d de %d falhou. Erro: %s - %s",
+                        tentativa,
+                        max_attempts,
+                        type(exc).__name__,
+                        exc,
+                    )
+                    tentativa += 1
                     time.sleep(waiting_time)
-            raise Exception(f"Not possible to execute after {max_attempts} attempts.")
+            raise RuntimeError(f"Nao foi possivel concluir apos {max_attempts} tentativas.")
+
         return wrapper
+
     return decorador

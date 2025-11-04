@@ -32,6 +32,15 @@ class BaseBot:
         return path.join(self._resources_path(resource_folder), filename)
 
     def _resources_path(self, resource_folder="resources"):
+        """
+        Resolve the absolute path for the given resource folder.
+
+        Args:
+            resource_folder (str): Folder name relative to the bot implementation.
+
+        Returns:
+            str: Absolute path to the resource folder.
+        """
         # This checks if this is a pyinstaller binary
         # More info here: https://pyinstaller.org/en/stable/runtime-information.html#run-time-information
         if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
@@ -109,12 +118,27 @@ class BaseBot:
         return None
 
     def _image_path_as_image(self, path):
+        """
+        Open the image located at the provided path.
+
+        Args:
+            path (str): Absolute path to the image file.
+
+        Returns:
+            PIL.Image.Image | None: Opened image or None when path is invalid.
+        """
         if path:
             return Image.open(path)
         return None
 
     @classmethod
     def main(cls):
+        """
+        Default entry point when running a bot module directly.
+
+        It optionally integrates with BotCity Maestro when the proper
+        arguments are provided.
+        """
         try:
             from botcity.maestro import BotExecution, BotMaestroSDK
             maestro_available = True

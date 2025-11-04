@@ -1,130 +1,108 @@
-import json
 import logging
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Union
 
 
 class Validar:
-    @staticmethod
-    def validar_dicionario(mensagem):
-        """
-        Valida se todos os campos do dicionário possuem valores.
-
-        Args:
-            mensagem (dict): Dicionário a ser validado.
-
-        Returns:
-            bool: Retorna True se todos os campos têm valores e False caso contrário.
-        """
-        for key, value in mensagem.items():
-            if not value:
-                return False
-        return True
+    """Funcoes auxiliares para validar campos recebidos do payload."""
 
     @staticmethod
-    def retornar_campos_vazios(mensagem):
+    def validar_dicionario(mensagem: dict) -> bool:
         """
-        Retorna uma lista de campos do dicionário que estão vazios.
+        Valida se todos os campos do dicionario possuem valores.
 
         Args:
-            mensagem (dict): Dicionário a ser verificado.
+            mensagem (dict): Dados recebidos.
 
         Returns:
-            list: Lista contendo os campos vazios.
+            bool: True quando todos os campos estao preenchidos.
         """
-        return [key for key, value in mensagem.items() if not value]
+        return all(mensagem.values())
+
+    @staticmethod
+    def retornar_campos_vazios(mensagem: dict):
+        """
+        Lista os campos vazios do dicionario informado.
+
+        Args:
+            mensagem (dict): Dados recebidos.
+
+        Returns:
+            list[str]: Campos sem valor.
+        """
+        return [chave for chave, valor in mensagem.items() if not valor]
 
     def _generate_first_digit(self, doc: Union[str, list]) -> str:
-        """Gerar o primeiro dígito verificador do CNPJ."""
-        sum = 0
+        """Calcula o primeiro digito verificador do CNPJ."""
+        soma = 0
+        for idx in range(12):
+            soma += int(doc[idx]) * self.weights_first[idx]
 
-        for i in range(12):
-            sum += int(doc[i]) * self.weights_first[i]
+        soma %= 11
+        return "0" if soma < 2 else str(11 - soma)
 
-        sum = sum % 11
-
-        if sum < 2:
-            sum = 0
-        else:
-            sum = 11 - sum
-
-        return str(sum)
-    
     def _generate_second_digit(self, doc: Union[str, list]) -> str:
-        """Gerar o segundo dígito verificador do CNPJ."""
-        sum = 0
+        """Calcula o segundo digito verificador do CNPJ."""
+        soma = 0
+        for idx in range(13):
+            soma += int(doc[idx]) * self.weights_second[idx]
 
-        for i in range(13):
-            sum += int(doc[i]) * self.weights_second[i]
-
-        sum = sum % 11
-
-        if sum < 2:
-            sum = 0
-        else:
-            sum = 11 - sum
-
-        return str(sum)
+        soma %= 11
+        return "0" if soma < 2 else str(11 - soma)
 
     @staticmethod
     def validar_cnpj(cnpj: str) -> Union[bool, str]:
+        """
+        Valida e sanitiza um numero de CNPJ.
+
+        Args:
+            cnpj (str): Numero de CNPJ com ou sem formatacao.
+
+        Returns:
+            Union[bool, str]: CNPJ somente com digitos ou False quando invalido.
+        """
+
         def _generate_first_digit(doc: str) -> str:
-            """Gerar o primeiro dígito verificador do CNPJ."""
-            weights_first = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-            sum = 0
-
-            for i in range(12):
-                sum += int(doc[i]) * weights_first[i]
-
-            sum = sum % 11
-
-            if sum < 2:
-                sum = 0
-            else:
-                sum = 11 - sum
-
-            return str(sum)
+            pesos = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+            soma = sum(int(doc[idx]) * pesos[idx] for idx in range(12))
+            soma %= 11
+            return "0" if soma < 2 else str(11 - soma)
 
         def _generate_second_digit(doc: str) -> str:
-            """Gerar o segundo dígito verificador do CNPJ."""
-            weights_second = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-            sum = 0
+            pesos = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+            soma = sum(int(doc[idx]) * pesos[idx] for idx in range(13))
+            soma %= 11
+            return "0" if soma < 2 else str(11 - soma)
 
-            for i in range(13):
-                sum += int(doc[i]) * weights_second[i]
+        cnpj_limpo = re.sub(r"[^0-9]", "", cnpj or "")
 
-            sum = sum % 11
-
-            if sum < 2:
-                sum = 0
-            else:
-                sum = 11 - sum
-
-            return str(sum)
-
-        cnpj = re.sub(r'[^0-9]', '', cnpj)
-
-        if len(cnpj) != 14:
+        if len(cnpj_limpo) != 14:
             return False
 
-        for i in range(10):
-            if cnpj.count("{}".format(i)) == 14:
-                return False
-
-        if _generate_first_digit(cnpj) == cnpj[12] and _generate_second_digit(cnpj) == cnpj[13]:
-            return cnpj
-        else:
+        if any(cnpj_limpo.count(str(i)) == 14 for i in range(10)):
             return False
 
-        
-
+        if _generate_first_digit(cnpj_limpo) == cnpj_limpo[12] and _generate_second_digit(cnpj_limpo) == cnpj_limpo[13]:
+            return cnpj_limpo
+        return False
 
     @staticmethod
-    def is_start_date_greater_than_end_date(start_date, end_date):
+    def is_start_date_greater_than_end_date(start_date: str, end_date: str) -> bool:
+        """
+        Verifica se a data inicial e anterior ou igual a data final.
+
+        Args:
+            start_date (str): Data inicial no formato DD/MM/AAAA.
+            end_date (str): Data final no formato DD/MM/AAAA.
+
+        Returns:
+            bool: True quando a ordem informada e valida; False caso contrario.
+        """
         try:
-            start_date = datetime.strptime(start_date, '%d/%m/%Y')
-            end_date = datetime.strptime(end_date, '%d/%m/%Y')
-            return start_date <= end_date
-        except Exception as e:
-            raise logging.error(f'Error checking if start date is greater than end date: {e}')
+            data_inicial = datetime.strptime(start_date, "%d/%m/%Y")
+            data_final = datetime.strptime(end_date, "%d/%m/%Y")
+            return data_inicial <= data_final
+        except Exception as exc:
+            logging.error("Erro ao comparar datas: %s", exc)
+            return False

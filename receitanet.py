@@ -8,7 +8,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from resources.core import DesktopBot
+from src.core.bot import DesktopBot
 
 
 class ReceitaNetBx(DesktopBot):
@@ -34,24 +34,24 @@ class ReceitaNetBx(DesktopBot):
         self.dir_app = r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Programas RFB\Receitanet BX\Receitanet BX 1.9.24.lnk"
 
         base_dir = os.path.abspath(os.path.dirname(__file__))
-        resources_dir = os.path.join(base_dir, "resources", "images")
+        resources_dir = os.path.join(base_dir, "src", "images")
 
-        self.dir_login = resources_dir + "/login"
-        self.list_btn_entrar = resources_dir + "/button-entrar"
-        self.certificado_alz = resources_dir + "/icon-certificado-alz"
-        self.certificado_auditoria = resources_dir + "/icon-certificado-auditoria"
-        self.select_todos = resources_dir + "/selecionar-todos"
-        self.dir_pop_ups = resources_dir + "/pop-ups"
-        self.dir_baixa = resources_dir + "/baixa"
-        self.dir_sped_fiscal = resources_dir + "/sped-fiscal"
-        self.dir_combobox_sistema = resources_dir + "/combobox-sistemas"
-        self.dir_combobox_arquivo = resources_dir + "/combobox-arquivos"
-        self.dir_combobox_periodo = resources_dir + "/combobox-periodos"
-        self.dir_selecione_sistema = self.dir_combobox_sistema + "/selecione sistema"
-        self.dir_selecione_arquivo = self.dir_combobox_arquivo + "/selecione arquivo"
-        self.dir_selecione_periodo = self.dir_combobox_periodo + "/selecione periodo"
-        self.list_btn_baixar = self.dir_baixa + "/button-baixar"
-        self.list_icon_marcar = self.dir_baixa + "/icon-marcar"
+        self.dir_login = os.path.join(resources_dir, "login")
+        self.list_btn_entrar = os.path.join(resources_dir, "button-entrar")
+        self.certificado_alz = os.path.join(resources_dir, "icon-certificado-alz")
+        self.certificado_auditoria = os.path.join(resources_dir, "icon-certificado-auditoria")
+        self.select_todos = os.path.join(resources_dir, "selecionar-todos")
+        self.dir_pop_ups = os.path.join(resources_dir, "pop-ups")
+        self.dir_baixa = os.path.join(resources_dir, "baixa")
+        self.dir_sped_fiscal = os.path.join(resources_dir, "sped-fiscal")
+        self.dir_combobox_sistema = os.path.join(resources_dir, "combobox-sistemas")
+        self.dir_combobox_arquivo = os.path.join(resources_dir, "combobox-arquivos")
+        self.dir_combobox_periodo = os.path.join(resources_dir, "combobox-periodos")
+        self.dir_selecione_sistema = os.path.join(self.dir_combobox_sistema, "selecione sistema")
+        self.dir_selecione_arquivo = os.path.join(self.dir_combobox_arquivo, "selecione arquivo")
+        self.dir_selecione_periodo = os.path.join(self.dir_combobox_periodo, "selecione periodo")
+        self.list_btn_baixar = os.path.join(self.dir_baixa, "button-baixar")
+        self.list_icon_marcar = os.path.join(self.dir_baixa, "icon-marcar")
         self.result = None
 
     def abrir_aplicativo(self):
@@ -80,44 +80,44 @@ class ReceitaNetBx(DesktopBot):
         Carrega as imagens necessárias para a execução do robô.
         """
         try:
-            self.add_image("atualizar-lista", self.dir_login + "/atualizar-lista.png")
-            self.add_image("box-buscar-todos", self.dir_sped_fiscal + "/box-buscar-todos.png")
-            self.add_image("box-ultimo-arquivo", self.dir_sped_fiscal + "/box-ultimo-arquivo.png")
-            self.add_image("button-pesquisar", self.dir_baixa + "/button-pesquisar.png")
-            self.add_image("button-solicitar-arquivos-marcados", self.dir_baixa + "/button-solicitar-arquivos-marcados.png")
-            self.add_image("combobox-dados-agregados", self.dir_combobox_arquivo + "/dados-agregados-escrituracao.png")
-            self.add_image("combobox-entrega", self.dir_combobox_periodo + "/periodo-de-entrega.png")
-            self.add_image("combobox-entrega-da-incorporada", self.dir_combobox_periodo + "/periodo-de-entrega-da-incorporada.png")
-            self.add_image("combobox-escrituracao", self.dir_combobox_arquivo + "/escrituracao.png")
-            self.add_image("combobox-escrituracao-contabil-digital", self.dir_combobox_arquivo + "/escrituracao-contabil-digital.png")
-            self.add_image("combobox-escrituracao-da-incorporada", self.dir_combobox_periodo + "/periodo-de-escrituracao-da-incorporada.png")
-            self.add_image("combobox-escrituracao-fiscal", self.dir_combobox_arquivo + "/escrituracao-fiscal.png")
-            self.add_image("combobox-perfil", self.dir_login + "/combobox-contribuinte.png")
-            self.add_image("combobox-periodo-escrituracao", self.dir_combobox_periodo + "/periodo-escrituracao.png")
-            self.add_image("combobox-periodo-entrega", self.dir_combobox_periodo + "/periodo-de-entrega.png")
-            self.add_image("combobox-sped-contabil", self.dir_combobox_sistema + "/contabil.png")
-            self.add_image("combobox-sped-contribuicoes", self.dir_combobox_sistema + "/contribuicoes.png")
-            self.add_image("combobox-sped-ecf", self.dir_combobox_sistema + "/ecf.png")
-            self.add_image("combobox-sped-fiscal", self.dir_combobox_sistema + "/fiscal.png")
-            self.add_image("combobox-termos-junta-comercial", self.dir_combobox_arquivo + "/termos-junta-comercial.png")
-            self.add_image("combobox-validacao-escrituracao", self.dir_combobox_arquivo + "/validacao-escrituracao.png")
-            self.add_image("fim-download", self.dir_baixa + "/fim-download.png")
-            self.add_image("icon-acompanhamento", self.dir_baixa + "/icon-acompanhamento.png")
-            self.add_image("icon-marcar", self.dir_baixa + "/icon-marcar.png")
-            self.add_image("icon-pesquisa", self.dir_baixa + "/icon-pesquisa.png")
-            self.add_image("input-cnjp", self.dir_sped_fiscal + "/input-cnpj.png")
-            self.add_image("input-data-fim", self.dir_baixa + "/data-fim.png")
-            self.add_image("input-data-fim-fiscal", self.dir_sped_fiscal + "/input-data-fim.png")
-            self.add_image("input-data-fim-incorporada", self.dir_baixa + "/data-fim-incorporada.png")
-            self.add_image("input-data-inicio", self.dir_baixa + "/data-inicio.png")
-            self.add_image("input-data-inicio-fiscal", self.dir_sped_fiscal + "/input-data-inicio.png")
-            self.add_image("input-data-inicio-incorporada", self.dir_baixa + "/data-inicio-incorporada.png")
-            self.add_image("input-pf", self.dir_login + "/input-cpf.png")
-            self.add_image("input-pj", self.dir_login + "/input-cnpj.png")
-            self.add_image("input-procurador", self.dir_baixa + "/cnpj-incorporada.png")
-            self.add_image("login-efetuado", self.dir_login + "/validate-login.png")
-            self.add_image("msg-aguardando", self.dir_baixa + "/msg-aguardando.png")
-            self.add_image("msg-erro-data", self.dir_baixa + "/msg-erro-data.png")
+            self.add_image("atualizar-lista", os.path.join(self.dir_login, "atualizar-lista.png"))
+            self.add_image("box-buscar-todos", os.path.join(self.dir_sped_fiscal, "box-buscar-todos.png"))
+            self.add_image("box-ultimo-arquivo", os.path.join(self.dir_sped_fiscal, "box-ultimo-arquivo.png"))
+            self.add_image("button-pesquisar", os.path.join(self.dir_baixa, "button-pesquisar.png"))
+            self.add_image("button-solicitar-arquivos-marcados", os.path.join(self.dir_baixa, "button-solicitar-arquivos-marcados.png"))
+            self.add_image("combobox-dados-agregados", os.path.join(self.dir_combobox_arquivo, "dados-agregados-escrituracao.png"))
+            self.add_image("combobox-entrega", os.path.join(self.dir_combobox_periodo, "periodo-de-entrega.png"))
+            self.add_image("combobox-entrega-da-incorporada", os.path.join(self.dir_combobox_periodo, "periodo-de-entrega-da-incorporada.png"))
+            self.add_image("combobox-escrituracao", os.path.join(self.dir_combobox_arquivo, "escrituracao.png"))
+            self.add_image("combobox-escrituracao-contabil-digital", os.path.join(self.dir_combobox_arquivo, "escrituracao-contabil-digital.png"))
+            self.add_image("combobox-escrituracao-da-incorporada", os.path.join(self.dir_combobox_periodo, "periodo-de-escrituracao-da-incorporada.png"))
+            self.add_image("combobox-escrituracao-fiscal", os.path.join(self.dir_combobox_arquivo, "escrituracao-fiscal.png"))
+            self.add_image("combobox-perfil", os.path.join(self.dir_login, "combobox-contribuinte.png"))
+            self.add_image("combobox-periodo-escrituracao", os.path.join(self.dir_combobox_periodo, "periodo-escrituracao.png"))
+            self.add_image("combobox-periodo-entrega", os.path.join(self.dir_combobox_periodo, "periodo-de-entrega.png"))
+            self.add_image("combobox-sped-contabil", os.path.join(self.dir_combobox_sistema, "contabil.png"))
+            self.add_image("combobox-sped-contribuicoes", os.path.join(self.dir_combobox_sistema, "contribuicoes.png"))
+            self.add_image("combobox-sped-ecf", os.path.join(self.dir_combobox_sistema, "ecf.png"))
+            self.add_image("combobox-sped-fiscal", os.path.join(self.dir_combobox_sistema, "fiscal.png"))
+            self.add_image("combobox-termos-junta-comercial", os.path.join(self.dir_combobox_arquivo, "termos-junta-comercial.png"))
+            self.add_image("combobox-validacao-escrituracao", os.path.join(self.dir_combobox_arquivo, "validacao-escrituracao.png"))
+            self.add_image("fim-download", os.path.join(self.dir_baixa, "fim-download.png"))
+            self.add_image("icon-acompanhamento", os.path.join(self.dir_baixa, "icon-acompanhamento.png"))
+            self.add_image("icon-marcar", os.path.join(self.dir_baixa, "icon-marcar.png"))
+            self.add_image("icon-pesquisa", os.path.join(self.dir_baixa, "icon-pesquisa.png"))
+            self.add_image("input-cnjp", os.path.join(self.dir_sped_fiscal, "input-cnpj.png"))
+            self.add_image("input-data-fim", os.path.join(self.dir_baixa, "data-fim.png"))
+            self.add_image("input-data-fim-fiscal", os.path.join(self.dir_sped_fiscal, "input-data-fim.png"))
+            self.add_image("input-data-fim-incorporada", os.path.join(self.dir_baixa, "data-fim-incorporada.png"))
+            self.add_image("input-data-inicio", os.path.join(self.dir_baixa, "data-inicio.png"))
+            self.add_image("input-data-inicio-fiscal", os.path.join(self.dir_sped_fiscal, "input-data-inicio.png"))
+            self.add_image("input-data-inicio-incorporada", os.path.join(self.dir_baixa, "data-inicio-incorporada.png"))
+            self.add_image("input-pf", os.path.join(self.dir_login, "input-cpf.png"))
+            self.add_image("input-pj", os.path.join(self.dir_login, "input-cnpj.png"))
+            self.add_image("input-procurador", os.path.join(self.dir_baixa, "cnpj-incorporada.png"))
+            self.add_image("login-efetuado", os.path.join(self.dir_login, "validate-login.png"))
+            self.add_image("msg-aguardando", os.path.join(self.dir_baixa, "msg-aguardando.png"))
+            self.add_image("msg-erro-data", os.path.join(self.dir_baixa, "msg-erro-data.png"))
             self.add_image("msg-falha-comunicacao", self.dir_baixa + "/msg-falha-comunicacao-servidor.png")
             self.add_image("msg-nao-existe-procuracao", self.dir_baixa + "/msg-nao-existe-procuracao.png")
             self.add_image("msg-procuracao-vencida", self.dir_baixa + "/msg-procuracao-vencida.png")
