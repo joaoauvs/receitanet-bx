@@ -27,10 +27,20 @@ class Sped(DesktopBot):
         images_dir = path.join(base_dir, "src", "images")
         self.dir_baixa = path.join(images_dir, "baixa")
         self.dir_selector_box = path.join(images_dir, "seletor-box")
-        self.add_image("button-criterios-acima", path.join(self.dir_baixa, "button-criterios-acima.png"))
-        self.add_image("button-pesquisar", path.join(self.dir_baixa, "button-pesquisar.png"))
-        self.add_image("button-solicitar-arquivos-marcados", path.join(self.dir_baixa, "button-solicitar-arquivos-marcados.png"))
-        self.add_image("resultado-pesquisa", path.join(self.dir_baixa, "resultado-pesquisa.png"))
+        self.add_image(
+            "button-criterios-acima",
+            path.join(self.dir_baixa, "button-criterios-acima.png")
+        )
+        self.add_image(
+            "button-pesquisar",
+            path.join(self.dir_baixa, "button-pesquisar.png")
+        )
+        btn_solicitar = path.join(
+            self.dir_baixa, "button-solicitar-arquivos-marcados.png"
+        )
+        self.add_image("button-solicitar-arquivos-marcados", btn_solicitar)
+        resultado_pesquisa = path.join(self.dir_baixa, "resultado-pesquisa.png")
+        self.add_image("resultado-pesquisa", resultado_pesquisa)
 
     def wait_for_element(self, element, timeout=30, matching=0.97):
         """
@@ -58,7 +68,8 @@ class Sped(DesktopBot):
         Args:
             tipo (str): Tipo de arquivo SPED a ser baixado.
         """
-        logging.info("Clicando no botao Solicitar Arquivos usando os criterios acima")
+        msg = "Clicando no botao Solicitar Arquivos usando os criterios acima"
+        logging.info(msg)
         self.find_click_image(identifier="button-criterios-acima", match=0.97)
         if self.receitanet.validar_solicitacao():
             self.receitanet.baixar_arquivos()
@@ -76,8 +87,12 @@ class Sped(DesktopBot):
         if self.wait_for_element("resultado-pesquisa"):
             logging.info("Arquivo encontrado")
             self.find_click_list_image(path=self.dir_selector_box)
-            if self.wait_for_element("button-solicitar-arquivos-marcados"):
-                logging.info("Selecionando o button -> SOLICITAR ARQUIVOS MARCADOS <-")
+            has_btn = self.wait_for_element(
+                "button-solicitar-arquivos-marcados"
+            )
+            if has_btn:
+                msg = "Selecionando button -> SOLICITAR ARQUIVOS MARCADOS <-"
+                logging.info(msg)
                 self.click_image("button-solicitar-arquivos-marcados")
                 if self.receitanet.validar_solicitacao():
                     self.receitanet.baixar_arquivos()
@@ -103,7 +118,7 @@ class Sped(DesktopBot):
 
     def _finalizar_processo(self, tipo):
         """
-        Finaliza o processo de download verificando resultados e solicitando arquivos.
+        Finaliza o processo de download verificando resultados.
 
         Args:
             tipo (str): Tipo de arquivo SPED sendo processado.
@@ -112,10 +127,12 @@ class Sped(DesktopBot):
             if self.find("resultado-pesquisa", matching=0.9):
                 logging.info("Arquivo encontrado")
                 time.sleep(5)
-                logging.info("Validando se existe o seletor para marcar arquivos")
+                msg = "Validando se existe o seletor para marcar arquivos"
+                logging.info(msg)
                 self.find_click_list_image(path=self.dir_selector_box)
                 time.sleep(10)
-                logging.info("Selecionando o button -> SOLICITAR ARQUIVOS MARCADOS <-")
+                msg = "Selecionando button -> SOLICITAR ARQUIVOS MARCADOS <-"
+                logging.info(msg)
                 self.click_image("button-solicitar-arquivos-marcados")
                 if self.receitanet.validar_solicitacao():
                     self.receitanet.baixar_arquivos()
@@ -126,7 +143,16 @@ class Sped(DesktopBot):
         except Exception as exc:
             raise Exception(f"Erro ao baixar o {tipo}: {exc}") from exc
 
-    def process_download(self, tipo, sistema, sistema_anterior, tipo_arquivo, validacao, periodo, periodo_anterior=None):
+    def process_download(
+        self,
+        tipo,
+        sistema,
+        sistema_anterior,
+        tipo_arquivo,
+        validacao,
+        periodo,
+        periodo_anterior=None
+    ):
         """
         Processa o download de qualquer modalidade de SPED.
 
@@ -141,12 +167,21 @@ class Sped(DesktopBot):
         """
         logging.info("* INICIANDO O PROCESSO DE BAIXA DO %s *", tipo)
         try:
-            self.receitanet.selecionar_sistema(sistema=sistema, sistema_Anterior=sistema_anterior)
-            self.receitanet.selecionar_arquivo(tipo_Arquivo=tipo_arquivo, validacao=validacao)
-            self.receitanet.selecionar_periodo(periodo=periodo, periodo_Anterior=periodo_anterior)
+            self.receitanet.selecionar_sistema(
+                sistema=sistema, sistema_Anterior=sistema_anterior
+            )
+            self.receitanet.selecionar_arquivo(
+                tipo_Arquivo=tipo_arquivo, validacao=validacao
+            )
+            self.receitanet.selecionar_periodo(
+                periodo=periodo, periodo_Anterior=periodo_anterior
+            )
 
             if tipo == "SPED Fiscal":
-                self.receitanet.input_campos_fiscais(primeiro_dia=self.data_inicial, ultimo_dia=self.data_final)
+                self.receitanet.input_campos_fiscais(
+                    primeiro_dia=self.data_inicial,
+                    ultimo_dia=self.data_final
+                )
                 self._finalizar_processo(tipo)
             else:
                 self._processar_outros_speds(tipo)

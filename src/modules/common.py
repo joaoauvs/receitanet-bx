@@ -81,7 +81,9 @@ def attempts(max_attempts=3, waiting_time=1):
                     )
                     tentativa += 1
                     time.sleep(waiting_time)
-            raise RuntimeError(f"Nao foi possivel concluir apos {max_attempts} tentativas.")
+            raise RuntimeError(
+                f"Nao foi possivel concluir apos {max_attempts} tentativas."
+            )
 
         return wrapper
 

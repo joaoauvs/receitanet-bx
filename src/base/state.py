@@ -6,6 +6,7 @@ class State(object):
         element (NamedTuple): The last found element coordinates
         map_images (dict): A dictionary holding label and filepath for images
     """
+
     _initialized = False
 
     def __init__(self):
@@ -36,7 +37,7 @@ class State(object):
     def center(self):
         if self.element is not None:
             x, y, w, h = self.element
-            return x+w/2.0, y+h/2.0
+            return x + w / 2.0, y + h / 2.0
         return None, None
 
 
@@ -44,6 +45,7 @@ class SingleState(State):
     """
     Singleton class holding state information
     """
+
     _instance = None
     _initialized = False
 

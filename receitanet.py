@@ -32,10 +32,11 @@ class ReceitaNetBx(DesktopBot):
         self.found = threading.Event()
         self.dir_docs = Path.home() / "Documents/Arquivos ReceitanetBX"
         self.nome_app = "Receitanet BX"
-        self.dir_app = str(
-            Path("C:/ProgramData/Microsoft/Windows/Start Menu/Programs/Programas RFB/Receitanet BX")
-            / "Receitanet BX 1.9.24.lnk"
+        base_path = (
+            "C:/ProgramData/Microsoft/Windows/Start Menu/"
+            "Programs/Programas RFB/Receitanet BX"
         )
+        self.dir_app = str(Path(base_path) / "Receitanet BX 1.9.24.lnk")
 
         base_dir = os.path.abspath(os.path.dirname(__file__))
         resources_dir = os.path.join(base_dir, "src", "images")
@@ -43,7 +44,9 @@ class ReceitaNetBx(DesktopBot):
         self.dir_login = os.path.join(resources_dir, "login")
         self.list_btn_entrar = os.path.join(resources_dir, "button-entrar")
         self.certificado_alz = os.path.join(resources_dir, "icon-certificado-alz")
-        self.certificado_auditoria = os.path.join(resources_dir, "icon-certificado-auditoria")
+        self.certificado_auditoria = os.path.join(
+            resources_dir, "icon-certificado-auditoria"
+        )
         self.select_todos = os.path.join(resources_dir, "selecionar-todos")
         self.dir_pop_ups = os.path.join(resources_dir, "pop-ups")
         self.dir_baixa = os.path.join(resources_dir, "baixa")
@@ -51,9 +54,15 @@ class ReceitaNetBx(DesktopBot):
         self.dir_combobox_sistema = os.path.join(resources_dir, "combobox-sistemas")
         self.dir_combobox_arquivo = os.path.join(resources_dir, "combobox-arquivos")
         self.dir_combobox_periodo = os.path.join(resources_dir, "combobox-periodos")
-        self.dir_selecione_sistema = os.path.join(self.dir_combobox_sistema, "selecione sistema")
-        self.dir_selecione_arquivo = os.path.join(self.dir_combobox_arquivo, "selecione arquivo")
-        self.dir_selecione_periodo = os.path.join(self.dir_combobox_periodo, "selecione periodo")
+        self.dir_selecione_sistema = os.path.join(
+            self.dir_combobox_sistema, "selecione sistema"
+        )
+        self.dir_selecione_arquivo = os.path.join(
+            self.dir_combobox_arquivo, "selecione arquivo"
+        )
+        self.dir_selecione_periodo = os.path.join(
+            self.dir_combobox_periodo, "selecione periodo"
+        )
         self.list_btn_baixar = os.path.join(self.dir_baixa, "button-baixar")
         self.list_icon_marcar = os.path.join(self.dir_baixa, "icon-marcar")
         self.result = None
@@ -99,23 +108,75 @@ class ReceitaNetBx(DesktopBot):
                 ("box-buscar-todos", self.dir_sped_fiscal, "box-buscar-todos.png"),
                 ("box-ultimo-arquivo", self.dir_sped_fiscal, "box-ultimo-arquivo.png"),
                 ("button-pesquisar", self.dir_baixa, "button-pesquisar.png"),
-                ("button-solicitar-arquivos-marcados", self.dir_baixa, "button-solicitar-arquivos-marcados.png"),
-                ("combobox-dados-agregados", self.dir_combobox_arquivo, "dados-agregados-escrituracao.png"),
-                ("combobox-entrega", self.dir_combobox_periodo, "periodo-de-entrega.png"),
-                ("combobox-entrega-da-incorporada", self.dir_combobox_periodo, "periodo-de-entrega-da-incorporada.png"),
-                ("combobox-escrituracao", self.dir_combobox_arquivo, "escrituracao.png"),
-                ("combobox-escrituracao-contabil-digital", self.dir_combobox_arquivo, "escrituracao-contabil-digital.png"),
-                ("combobox-escrituracao-da-incorporada", self.dir_combobox_periodo, "periodo-de-escrituracao-da-incorporada.png"),
-                ("combobox-escrituracao-fiscal", self.dir_combobox_arquivo, "escrituracao-fiscal.png"),
+                (
+                    "button-solicitar-arquivos-marcados",
+                    self.dir_baixa,
+                    "button-solicitar-arquivos-marcados.png",
+                ),
+                (
+                    "combobox-dados-agregados",
+                    self.dir_combobox_arquivo,
+                    "dados-agregados-escrituracao.png",
+                ),
+                (
+                    "combobox-entrega",
+                    self.dir_combobox_periodo,
+                    "periodo-de-entrega.png",
+                ),
+                (
+                    "combobox-entrega-da-incorporada",
+                    self.dir_combobox_periodo,
+                    "periodo-de-entrega-da-incorporada.png",
+                ),
+                (
+                    "combobox-escrituracao",
+                    self.dir_combobox_arquivo,
+                    "escrituracao.png",
+                ),
+                (
+                    "combobox-escrituracao-contabil-digital",
+                    self.dir_combobox_arquivo,
+                    "escrituracao-contabil-digital.png",
+                ),
+                (
+                    "combobox-escrituracao-da-incorporada",
+                    self.dir_combobox_periodo,
+                    "periodo-de-escrituracao-da-incorporada.png",
+                ),
+                (
+                    "combobox-escrituracao-fiscal",
+                    self.dir_combobox_arquivo,
+                    "escrituracao-fiscal.png",
+                ),
                 ("combobox-perfil", self.dir_login, "combobox-contribuinte.png"),
-                ("combobox-periodo-escrituracao", self.dir_combobox_periodo, "periodo-escrituracao.png"),
-                ("combobox-periodo-entrega", self.dir_combobox_periodo, "periodo-de-entrega.png"),
+                (
+                    "combobox-periodo-escrituracao",
+                    self.dir_combobox_periodo,
+                    "periodo-escrituracao.png",
+                ),
+                (
+                    "combobox-periodo-entrega",
+                    self.dir_combobox_periodo,
+                    "periodo-de-entrega.png",
+                ),
                 ("combobox-sped-contabil", self.dir_combobox_sistema, "contabil.png"),
-                ("combobox-sped-contribuicoes", self.dir_combobox_sistema, "contribuicoes.png"),
+                (
+                    "combobox-sped-contribuicoes",
+                    self.dir_combobox_sistema,
+                    "contribuicoes.png",
+                ),
                 ("combobox-sped-ecf", self.dir_combobox_sistema, "ecf.png"),
                 ("combobox-sped-fiscal", self.dir_combobox_sistema, "fiscal.png"),
-                ("combobox-termos-junta-comercial", self.dir_combobox_arquivo, "termos-junta-comercial.png"),
-                ("combobox-validacao-escrituracao", self.dir_combobox_arquivo, "validacao-escrituracao.png"),
+                (
+                    "combobox-termos-junta-comercial",
+                    self.dir_combobox_arquivo,
+                    "termos-junta-comercial.png",
+                ),
+                (
+                    "combobox-validacao-escrituracao",
+                    self.dir_combobox_arquivo,
+                    "validacao-escrituracao.png",
+                ),
                 ("fim-download", self.dir_baixa, "fim-download.png"),
                 ("icon-acompanhamento", self.dir_baixa, "icon-acompanhamento.png"),
                 ("icon-marcar", self.dir_baixa, "icon-marcar.png"),
@@ -123,19 +184,43 @@ class ReceitaNetBx(DesktopBot):
                 ("input-cnjp", self.dir_sped_fiscal, "input-cnpj.png"),
                 ("input-data-fim", self.dir_baixa, "data-fim.png"),
                 ("input-data-fim-fiscal", self.dir_sped_fiscal, "input-data-fim.png"),
-                ("input-data-fim-incorporada", self.dir_baixa, "data-fim-incorporada.png"),
+                (
+                    "input-data-fim-incorporada",
+                    self.dir_baixa,
+                    "data-fim-incorporada.png",
+                ),
                 ("input-data-inicio", self.dir_baixa, "data-inicio.png"),
-                ("input-data-inicio-fiscal", self.dir_sped_fiscal, "input-data-inicio.png"),
-                ("input-data-inicio-incorporada", self.dir_baixa, "data-inicio-incorporada.png"),
+                (
+                    "input-data-inicio-fiscal",
+                    self.dir_sped_fiscal,
+                    "input-data-inicio.png",
+                ),
+                (
+                    "input-data-inicio-incorporada",
+                    self.dir_baixa,
+                    "data-inicio-incorporada.png",
+                ),
                 ("input-pf", self.dir_login, "input-cpf.png"),
                 ("input-pj", self.dir_login, "input-cnpj.png"),
                 ("input-procurador", self.dir_baixa, "cnpj-incorporada.png"),
                 ("login-efetuado", self.dir_login, "validate-login.png"),
                 ("msg-aguardando", self.dir_baixa, "msg-aguardando.png"),
                 ("msg-erro-data", self.dir_baixa, "msg-erro-data.png"),
-                ("msg-falha-comunicacao", self.dir_baixa, "msg-falha-comunicacao-servidor.png"),
-                ("msg-nao-existe-procuracao", self.dir_baixa, "msg-nao-existe-procuracao.png"),
-                ("msg-procuracao-vencida", self.dir_baixa, "msg-procuracao-vencida.png"),
+                (
+                    "msg-falha-comunicacao",
+                    self.dir_baixa,
+                    "msg-falha-comunicacao-servidor.png",
+                ),
+                (
+                    "msg-nao-existe-procuracao",
+                    self.dir_baixa,
+                    "msg-nao-existe-procuracao.png",
+                ),
+                (
+                    "msg-procuracao-vencida",
+                    self.dir_baixa,
+                    "msg-procuracao-vencida.png",
+                ),
                 ("pop-up-error", self.dir_pop_ups, "erro.png"),
                 ("pop-up-nao-encontrado", self.dir_pop_ups, "nao-encontrado.png"),
                 ("pop-up-pedido", self.dir_pop_ups, "pedido.png"),
@@ -144,8 +229,16 @@ class ReceitaNetBx(DesktopBot):
                 ("procurador-pj", self.dir_login, "procurador-pj.png"),
                 ("resultado-pesquisa", self.dir_baixa, "resultado-pesquisa.png"),
                 ("selecionar-procurador", self.dir_login, "combobox-procurador.png"),
-                ("validacao-periodo-contabil", self.dir_combobox_periodo, "validacao-periodo-contabil.png"),
-                ("validacao-periodo-fiscal", self.dir_combobox_periodo, "validacao-periodo-fiscal.png"),
+                (
+                    "validacao-periodo-contabil",
+                    self.dir_combobox_periodo,
+                    "validacao-periodo-contabil.png",
+                ),
+                (
+                    "validacao-periodo-fiscal",
+                    self.dir_combobox_periodo,
+                    "validacao-periodo-fiscal.png",
+                ),
                 ("verificar-pedidos", self.dir_baixa, "verificar-pedidos.png"),
             ]
 
@@ -167,11 +260,17 @@ class ReceitaNetBx(DesktopBot):
         """
         if not self.found.is_set() and self.find(nome_popup, matching=0.8):
             with self._popup_lock:
-                if not self.found.is_set():  # Verifica novamente para evitar condições de corrida
+                if (
+                    not self.found.is_set()
+                ):  # Verifica novamente para evitar condições de corrida
                     self.click()
                     self.enter()
                     logging.info(log_msg)
-                    self.result = {"acao": acao, "status": status, "resultado": resultado}
+                    self.result = {
+                        "acao": acao,
+                        "status": status,
+                        "resultado": resultado,
+                    }
                     self.found.set()  # Sinaliza que uma condição foi satisfeita
 
     def login(self, contribuinte):
@@ -190,7 +289,9 @@ class ReceitaNetBx(DesktopBot):
                 logging.info("Logando com certificado A1")
                 logging.info("Selecionando o -> Certificado A1 <-")
                 self.find_click_list_image(path=self.certificado_alz, match=0.7)
-                logging.info("Selecionando a Combo Box -> Selecione um Perfil de Acesso <-")
+                logging.info(
+                    "Selecionando a Combo Box -> Selecione um Perfil de Acesso <-"
+                )
                 self.find_click_image(identifier="combobox-perfil", match=0.8)
                 logging.info("Selecionando a Combo Box -> Procurador <-")
                 self.find_click_image(identifier="selecionar-procurador", match=0.8)
@@ -222,7 +323,9 @@ class ReceitaNetBx(DesktopBot):
                 self.fechar_aplicativo()
                 time.sleep(5)
         else:
-            raise RuntimeError("[FALHA]: Ocorreu um erro ao tentar logar com o certificado A1")
+            raise RuntimeError(
+                "[FALHA]: Ocorreu um erro ao tentar logar com o certificado A1"
+            )
 
     def selecionar_sistema(self, sistema, sistema_Anterior=None):
         """
@@ -251,7 +354,9 @@ class ReceitaNetBx(DesktopBot):
         except Exception as e:
             self._raise_runtime_error("[FALHA]: Ao selecionar o sistema.", e)
 
-    def selecionar_arquivo(self, tipo_Arquivo, validacao=None, tipo_Arquivo_Anterior=None):
+    def selecionar_arquivo(
+        self, tipo_Arquivo, validacao=None, tipo_Arquivo_Anterior=None
+    ):
         """
         Seleciona o tipo de arquivo desejado.
 
@@ -274,7 +379,9 @@ class ReceitaNetBx(DesktopBot):
                     self.click_image(tipo_Arquivo_Anterior)
                     self.click_image(tipo_Arquivo)
                 else:
-                    raise RuntimeError(f"Erro ao selecionar o tipo de arquivo: {tipo_Arquivo}")
+                    raise RuntimeError(
+                        f"Erro ao selecionar o tipo de arquivo: {tipo_Arquivo}"
+                    )
             logging.info("Tipo de arquivo selecionado: %s", tipo_Arquivo)
         except Exception as e:
             self._raise_runtime_error("[FALHA]: Ao selecionar o tipo de arquivo.", e)
@@ -392,7 +499,9 @@ class ReceitaNetBx(DesktopBot):
         logging.info("INSERINDO DADOS: CNPJ, DATA DE INICIO E DATA DE FIM")
         try:
             if self.validate_exists(identifier="box-buscar-todos", match=0.87):
-                logging.info("Clicando no box -> Buscar Arquivos de Todos os Estabelecimentos <-")
+                logging.info(
+                    "Clicando no box -> Buscar Arquivos de Todos os Estabelecimentos <-"
+                )
                 self.click_image("box-buscar-todos", 0.9)
                 self.tab()
                 self.tab()
@@ -409,17 +518,27 @@ class ReceitaNetBx(DesktopBot):
                         logging.info("INSERINDO DADOS: DATA DE FIM")
                         self.type_key(ultimo_dia)
                         if self.validate_exists(identifier="box-ultimo-arquivo"):
-                            logging.info("Clicando no box -> Último Arquivo Transmitido <-")
+                            logging.info(
+                                "Clicando no box -> Último Arquivo Transmitido <-"
+                            )
                             self.click_image("box-ultimo-arquivo")
                             self.click_image("button-pesquisar")
                         else:
-                            logging.warning("Não foi encontrado o box -> Último Arquivo Transmitido <-")
+                            logging.warning(
+                                "Não foi encontrado o box -> Último Arquivo Transmitido <-"
+                            )
                     else:
-                        raise RuntimeError(f"Erro ao inserir a data final: {ultimo_dia}")
+                        raise RuntimeError(
+                            f"Erro ao inserir a data final: {ultimo_dia}"
+                        )
                 else:
-                    raise RuntimeError(f"Erro ao inserir a data inicial: {primeiro_dia}")
+                    raise RuntimeError(
+                        f"Erro ao inserir a data inicial: {primeiro_dia}"
+                    )
             else:
-                raise RuntimeError("Erro ao clicar no box -> Buscar Arquivos de Todos os Estabelecimentos <-")
+                raise RuntimeError(
+                    "Erro ao clicar no box -> Buscar Arquivos de Todos os Estabelecimentos <-"
+                )
         except Exception as e:
             self._raise_runtime_error("[FALHA]: Ao inserir os dados.", e)
 
@@ -437,20 +556,71 @@ class ReceitaNetBx(DesktopBot):
                     break
 
             popups = [
-                ("msg-falha-comunicacao", False, "Falha na comunicação com o sistema do Receita Net!", "Falha", "Falha na comunicação com o sistema do Receita Net!"),
-                ("pop-up-pedido", True, "Pedido Registrado Com Sucesso", "Processando...", "Pedido Registrado Com Sucesso!"),
-                ("pop-up-error", False, "Erro ao registrar o pedido", "Falha", "Erro ao registrar o pedido!"),
-                ("pop-up-nao-encontrado", False, "Não foi encontrado nenhum arquivo correspondente a pesquisa!", "Processado", "Não foi localizado nenhum arquivo!"),
-                ("popup-nenhum-arquivo", False, "Não foi encontrado nenhum arquivo correspondente a pesquisa!", "Processado", "Não foi localizado nenhum arquivo!"),
-                ("msg-erro-data", False, "A Data final deve ser igual ou menor que a data atual!", "Falha", "A Data final deve ser igual ou menor que a data atual!"),
-                ("msg-procuracao-vencida", False, "A procuração está vencida!", "Falha", "Procuração eletrônica vencida!"),
-                ("msg-nao-existe-procuracao", False, "Não existe procuração para este CNPJ!", "Falha", "Sem procuração para este CNPJ!"),
+                (
+                    "msg-falha-comunicacao",
+                    False,
+                    "Falha na comunicação com o sistema do Receita Net!",
+                    "Falha",
+                    "Falha na comunicação com o sistema do Receita Net!",
+                ),
+                (
+                    "pop-up-pedido",
+                    True,
+                    "Pedido Registrado Com Sucesso",
+                    "Processando...",
+                    "Pedido Registrado Com Sucesso!",
+                ),
+                (
+                    "pop-up-error",
+                    False,
+                    "Erro ao registrar o pedido",
+                    "Falha",
+                    "Erro ao registrar o pedido!",
+                ),
+                (
+                    "pop-up-nao-encontrado",
+                    False,
+                    "Não foi encontrado nenhum arquivo correspondente a pesquisa!",
+                    "Processado",
+                    "Não foi localizado nenhum arquivo!",
+                ),
+                (
+                    "popup-nenhum-arquivo",
+                    False,
+                    "Não foi encontrado nenhum arquivo correspondente a pesquisa!",
+                    "Processado",
+                    "Não foi localizado nenhum arquivo!",
+                ),
+                (
+                    "msg-erro-data",
+                    False,
+                    "A Data final deve ser igual ou menor que a data atual!",
+                    "Falha",
+                    "A Data final deve ser igual ou menor que a data atual!",
+                ),
+                (
+                    "msg-procuracao-vencida",
+                    False,
+                    "A procuração está vencida!",
+                    "Falha",
+                    "Procuração eletrônica vencida!",
+                ),
+                (
+                    "msg-nao-existe-procuracao",
+                    False,
+                    "Não existe procuração para este CNPJ!",
+                    "Falha",
+                    "Sem procuração para este CNPJ!",
+                ),
             ]
 
             # Criação e inicialização das threads
             threads = []
             for popup in popups:
-                thread = threading.Thread(target=self.verificar_popup, args=(popup[0], popup[1], popup[2], popup[3], popup[4]))
+                thread = threading.Thread(
+                    target=self.verificar_popup,
+                    args=(popup[0], popup[1], popup[2], popup[3], popup[4]),
+                )
                 threads.append(thread)
                 thread.start()
 
@@ -476,14 +646,22 @@ class ReceitaNetBx(DesktopBot):
             logging.info("Selecionando o Icon -> VER PEDIDOS E ARQUIVOS <-")
             # self.find_click_image(identifier="verificar-pedidos", match=0.9)
             logging.info("Selecionando o Box do Pedido")
-            self.find_click_list_image(path=self.list_icon_marcar, match=0.7, max_attempts=10)
+            self.find_click_list_image(
+                path=self.list_icon_marcar, match=0.7, max_attempts=10
+            )
             # time.sleep(20)
             logging.info("Selecionando o Box de Selecionar Todos")
-            self.find_click_list_image(path=self.select_todos, match=0.9, max_attempts=10)
+            self.find_click_list_image(
+                path=self.select_todos, match=0.9, max_attempts=10
+            )
             # time.sleep(90)
             logging.info("Selecionando o Button -> Baixar <-")
-            self.find_click_list_image(path=self.list_icon_marcar, match=0.7, max_attempts=10)
-            self.find_click_list_image(path=self.list_btn_baixar, match=0.7, max_attempts=10)
+            self.find_click_list_image(
+                path=self.list_icon_marcar, match=0.7, max_attempts=10
+            )
+            self.find_click_list_image(
+                path=self.list_btn_baixar, match=0.7, max_attempts=10
+            )
             while True:
                 if self.find("fim-download", matching=0.90):
                     logging.info("Download Finalizado")
@@ -525,7 +703,9 @@ class ReceitaNetBx(DesktopBot):
             elif "ECF" in tipo:
                 itens = arquivo.stem.split("-")
                 transmissao_dia = f"{itens[4][6:8]}/{itens[4][4:6]}/{itens[4][:4]}"
-                transmissao_hora = f"{itens[4][8:10]}:{itens[4][10:12]}:{itens[4][12:14]}"
+                transmissao_hora = (
+                    f"{itens[4][8:10]}:{itens[4][10:12]}:{itens[4][12:14]}"
+                )
                 periodo = f"{itens[3][4:6]}/{itens[3][:4]}"
             else:
                 continue
@@ -535,7 +715,10 @@ class ReceitaNetBx(DesktopBot):
 
             data_hora_atual = self._to_datetime(transmissao_dia, transmissao_hora)
 
-            if periodo not in arquivos_recentes_por_periodo or data_hora_atual > arquivos_recentes_por_periodo[periodo][0]:
+            if (
+                periodo not in arquivos_recentes_por_periodo
+                or data_hora_atual > arquivos_recentes_por_periodo[periodo][0]
+            ):
                 arquivos_recentes_por_periodo[periodo] = (data_hora_atual, arquivo.name)
         return arquivos_recentes_por_periodo
 
@@ -549,13 +732,18 @@ class ReceitaNetBx(DesktopBot):
         """
         logging.info("* INICIANDO A FUNÇÃO -> MANIPULAR ARQUIVOS <- *")
         try:
-            diretorio = Path.home() / f"OneDrive - Alianzo/ReceitaNet-Bx/{contribuinte}/{tipo}"
+            diretorio = (
+                Path.home() / f"OneDrive - Alianzo/ReceitaNet-Bx/{contribuinte}/{tipo}"
+            )
             diretorio.mkdir(parents=True, exist_ok=True)
 
             if "Contribuições" in tipo or "ECF" in tipo:
                 arquivos_recentes_por_periodo = self._buscar_arquivos_recentes(tipo)
 
-                for periodo, (data_hora_atual, arquivo) in arquivos_recentes_por_periodo.items():
+                for periodo, (
+                    data_hora_atual,
+                    arquivo,
+                ) in arquivos_recentes_por_periodo.items():
                     shutil.move(self.dir_docs / arquivo, diretorio / arquivo)
             else:
                 for arquivo in self.dir_docs.rglob("*"):

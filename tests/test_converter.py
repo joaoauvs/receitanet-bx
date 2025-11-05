@@ -1,3 +1,6 @@
+import calendar
+from datetime import datetime
+
 from src.modules.convert import Converter
 
 
@@ -13,11 +16,13 @@ def test_format_date_unknown_pattern_returns_false():
 
 
 def test_convert_date_to_string_first_day_of_month():
-    assert Converter.convert_date_to_string_first_day_of_month("Jan/2024") == "01/01/2024"
+    result = Converter.convert_date_to_string_first_day_of_month("Jan/2024")
+    assert result == "01/01/2024"
 
 
 def test_convert_date_to_string_last_day_of_month():
-    assert Converter.convert_date_to_string_last_day_of_month("Fev/2024") == "29/02/2024"
+    result = Converter.convert_date_to_string_last_day_of_month("Fev/2024")
+    assert result == "29/02/2024"
 
 
 def test_convert_date_to_year_month_returns_human_readable_month():
@@ -27,7 +32,8 @@ def test_convert_date_to_year_month_returns_human_readable_month():
 
 
 def test_convert_month_returns_full_name():
-    assert Converter.convert_month("Abr/2025") == "Abril/2025"
+    result = Converter.convert_month("Abr/2025")
+    assert result == "Abril/2025"
 
 
 @staticmethod
@@ -37,7 +43,20 @@ def convert_date_to_string_last_day_of_month(valor):
     mes_abrev_lower = mes_abrev.lower()
 
     # Map Portuguese abbreviations to English
-    meses_abreviados = {"jan": "jan", "fev": "feb", "mar": "mar", "abr": "apr", "mai": "may", "jun": "jun", "jul": "jul", "ago": "aug", "set": "sep", "out": "oct", "nov": "nov", "dez": "dec"}
+    meses_abreviados = {
+        "jan": "jan",
+        "fev": "feb",
+        "mar": "mar",
+        "abr": "apr",
+        "mai": "may",
+        "jun": "jun",
+        "jul": "jul",
+        "ago": "aug",
+        "set": "sep",
+        "out": "oct",
+        "nov": "nov",
+        "dez": "dec",
+    }
 
     mes_en = meses_abreviados.get(mes_abrev_lower, mes_abrev_lower)
     valor_en = f"{mes_en}/{ano}"

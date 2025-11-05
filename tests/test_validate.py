@@ -26,5 +26,9 @@ def test_validar_cnpj_returns_false_for_invalid_document():
 
 
 def test_is_start_date_greater_than_end_date():
-    assert Validar.is_start_date_greater_than_end_date("01/01/2024", "31/01/2024") is True
-    assert Validar.is_start_date_greater_than_end_date("31/01/2024", "01/01/2024") is False
+    assert (
+        Validar.is_start_date_greater_than_end_date("01/01/2024", "31/01/2024") is True
+    )
+    assert (
+        Validar.is_start_date_greater_than_end_date("31/01/2024", "01/01/2024") is False
+    )
