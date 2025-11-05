@@ -6,6 +6,28 @@ from datetime import datetime
 class Converter:
     """Conversoes utilitarias para datas em diferentes formatos."""
 
+    _PT_MONTHS = {
+        "jan": "Jan",
+        "fev": "Feb",
+        "mar": "Mar",
+        "abr": "Apr",
+        "mai": "May",
+        "jun": "Jun",
+        "jul": "Jul",
+        "ago": "Aug",
+        "set": "Sep",
+        "out": "Oct",
+        "nov": "Nov",
+        "dez": "Dec",
+    }
+
+    @staticmethod
+    def _normalize_month_abbr(valor: str) -> str:
+        abreviacao, ano = valor.split("/")
+        abreviacao = abreviacao.lower()
+        traducao = Converter._PT_MONTHS.get(abreviacao, abreviacao.title())
+        return f"{traducao}/{ano}"
+
     @staticmethod
     def format_date(valor: str):
         """
@@ -43,7 +65,8 @@ class Converter:
         Returns:
             str: Data no formato DD/MM/AAAA.
         """
-        data = datetime.strptime(valor.lower(), "%b/%Y")
+        normalizado = Converter._normalize_month_abbr(valor)
+        data = datetime.strptime(normalizado, "%b/%Y")
         return data.strftime("01/%m/%Y")
 
     @staticmethod
@@ -57,7 +80,8 @@ class Converter:
         Returns:
             str: Data no formato DD/MM/AAAA contendo o ultimo dia do mes.
         """
-        data = datetime.strptime(valor.lower(), "%b/%Y")
+        normalizado = Converter._normalize_month_abbr(valor)
+        data = datetime.strptime(normalizado, "%b/%Y")
         ultimo_dia = calendar.monthrange(data.year, data.month)[1]
         return data.replace(day=ultimo_dia).strftime("%d/%m/%Y")
 
@@ -72,22 +96,23 @@ class Converter:
         Returns:
             tuple[int, str]: Ano e nome do mes.
         """
-        data = datetime.strptime(valor.lower(), "%b/%Y")
-        meses = [
-            "Janeiro",
-            "Fevereiro",
-            "Marco",
-            "Abril",
-            "Maio",
-            "Junho",
-            "Julho",
-            "Agosto",
-            "Setembro",
-            "Outubro",
-            "Novembro",
-            "Dezembro",
-        ]
-        return data.year, meses[data.month - 1]
+        normalizado = Converter._normalize_month_abbr(valor)
+        data = datetime.strptime(normalizado, "%b/%Y")
+        meses = {
+            1: "Janeiro",
+            2: "Fevereiro",
+            3: "Marco",
+            4: "Abril",
+            5: "Maio",
+            6: "Junho",
+            7: "Julho",
+            8: "Agosto",
+            9: "Setembro",
+            10: "Outubro",
+            11: "Novembro",
+            12: "Dezembro",
+        }
+        return data.year, meses[data.month]
 
     @staticmethod
     def convert_month(valor: str) -> str:

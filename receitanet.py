@@ -1,6 +1,7 @@
+"""Automacao para interacao com o aplicativo ReceitaNet BX."""
+
 import logging
 import os
-import random
 import shutil
 import subprocess
 import threading
@@ -31,7 +32,10 @@ class ReceitaNetBx(DesktopBot):
         self.found = threading.Event()
         self.dir_docs = Path.home() / "Documents/Arquivos ReceitanetBX"
         self.nome_app = "Receitanet BX"
-        self.dir_app = r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Programas RFB\Receitanet BX\Receitanet BX 1.9.24.lnk"
+        self.dir_app = str(
+            Path("C:/ProgramData/Microsoft/Windows/Start Menu/Programs/Programas RFB/Receitanet BX")
+            / "Receitanet BX 1.9.24.lnk"
+        )
 
         base_dir = os.path.abspath(os.path.dirname(__file__))
         resources_dir = os.path.join(base_dir, "src", "images")
@@ -53,6 +57,16 @@ class ReceitaNetBx(DesktopBot):
         self.list_btn_baixar = os.path.join(self.dir_baixa, "button-baixar")
         self.list_icon_marcar = os.path.join(self.dir_baixa, "icon-marcar")
         self.result = None
+        self._popup_lock = threading.Lock()
+
+    def action(self, execution=None):
+        """Método exigido pela classe base (não utilizado diretamente)."""
+        raise NotImplementedError("Utilize a classe Bot para orquestrar a automação.")
+
+    @staticmethod
+    def _raise_runtime_error(message: str, error: Exception) -> None:
+        """Encapsula o relançamento de exceções com encadeamento adequado."""
+        raise RuntimeError(message) from error
 
     def abrir_aplicativo(self):
         """
@@ -62,8 +76,8 @@ class ReceitaNetBx(DesktopBot):
         try:
             self.execute(self.dir_app)
             self.focus_window_app(self.nome_app)
-        except Exception as e:
-            raise Exception(f"Erro ao abrir o aplicativo: {e}")
+        except Exception as exc:  # pylint: disable=broad-except
+            self._raise_runtime_error("Erro ao abrir o aplicativo.", exc)
 
     def fechar_aplicativo(self):
         """
@@ -72,68 +86,73 @@ class ReceitaNetBx(DesktopBot):
         try:
             logging.info("Encerrando aplicativo")
             subprocess.Popen("taskkill /f /im javaw.exe")
-        except Exception as e:
-            raise Exception(f"Erro ao encerrar aplicativo: {e}")
+        except Exception as exc:  # pylint: disable=broad-except
+            self._raise_runtime_error("Erro ao encerrar aplicativo.", exc)
 
     def load_images(self):
         """
         Carrega as imagens necessárias para a execução do robô.
         """
         try:
-            self.add_image("atualizar-lista", os.path.join(self.dir_login, "atualizar-lista.png"))
-            self.add_image("box-buscar-todos", os.path.join(self.dir_sped_fiscal, "box-buscar-todos.png"))
-            self.add_image("box-ultimo-arquivo", os.path.join(self.dir_sped_fiscal, "box-ultimo-arquivo.png"))
-            self.add_image("button-pesquisar", os.path.join(self.dir_baixa, "button-pesquisar.png"))
-            self.add_image("button-solicitar-arquivos-marcados", os.path.join(self.dir_baixa, "button-solicitar-arquivos-marcados.png"))
-            self.add_image("combobox-dados-agregados", os.path.join(self.dir_combobox_arquivo, "dados-agregados-escrituracao.png"))
-            self.add_image("combobox-entrega", os.path.join(self.dir_combobox_periodo, "periodo-de-entrega.png"))
-            self.add_image("combobox-entrega-da-incorporada", os.path.join(self.dir_combobox_periodo, "periodo-de-entrega-da-incorporada.png"))
-            self.add_image("combobox-escrituracao", os.path.join(self.dir_combobox_arquivo, "escrituracao.png"))
-            self.add_image("combobox-escrituracao-contabil-digital", os.path.join(self.dir_combobox_arquivo, "escrituracao-contabil-digital.png"))
-            self.add_image("combobox-escrituracao-da-incorporada", os.path.join(self.dir_combobox_periodo, "periodo-de-escrituracao-da-incorporada.png"))
-            self.add_image("combobox-escrituracao-fiscal", os.path.join(self.dir_combobox_arquivo, "escrituracao-fiscal.png"))
-            self.add_image("combobox-perfil", os.path.join(self.dir_login, "combobox-contribuinte.png"))
-            self.add_image("combobox-periodo-escrituracao", os.path.join(self.dir_combobox_periodo, "periodo-escrituracao.png"))
-            self.add_image("combobox-periodo-entrega", os.path.join(self.dir_combobox_periodo, "periodo-de-entrega.png"))
-            self.add_image("combobox-sped-contabil", os.path.join(self.dir_combobox_sistema, "contabil.png"))
-            self.add_image("combobox-sped-contribuicoes", os.path.join(self.dir_combobox_sistema, "contribuicoes.png"))
-            self.add_image("combobox-sped-ecf", os.path.join(self.dir_combobox_sistema, "ecf.png"))
-            self.add_image("combobox-sped-fiscal", os.path.join(self.dir_combobox_sistema, "fiscal.png"))
-            self.add_image("combobox-termos-junta-comercial", os.path.join(self.dir_combobox_arquivo, "termos-junta-comercial.png"))
-            self.add_image("combobox-validacao-escrituracao", os.path.join(self.dir_combobox_arquivo, "validacao-escrituracao.png"))
-            self.add_image("fim-download", os.path.join(self.dir_baixa, "fim-download.png"))
-            self.add_image("icon-acompanhamento", os.path.join(self.dir_baixa, "icon-acompanhamento.png"))
-            self.add_image("icon-marcar", os.path.join(self.dir_baixa, "icon-marcar.png"))
-            self.add_image("icon-pesquisa", os.path.join(self.dir_baixa, "icon-pesquisa.png"))
-            self.add_image("input-cnjp", os.path.join(self.dir_sped_fiscal, "input-cnpj.png"))
-            self.add_image("input-data-fim", os.path.join(self.dir_baixa, "data-fim.png"))
-            self.add_image("input-data-fim-fiscal", os.path.join(self.dir_sped_fiscal, "input-data-fim.png"))
-            self.add_image("input-data-fim-incorporada", os.path.join(self.dir_baixa, "data-fim-incorporada.png"))
-            self.add_image("input-data-inicio", os.path.join(self.dir_baixa, "data-inicio.png"))
-            self.add_image("input-data-inicio-fiscal", os.path.join(self.dir_sped_fiscal, "input-data-inicio.png"))
-            self.add_image("input-data-inicio-incorporada", os.path.join(self.dir_baixa, "data-inicio-incorporada.png"))
-            self.add_image("input-pf", os.path.join(self.dir_login, "input-cpf.png"))
-            self.add_image("input-pj", os.path.join(self.dir_login, "input-cnpj.png"))
-            self.add_image("input-procurador", os.path.join(self.dir_baixa, "cnpj-incorporada.png"))
-            self.add_image("login-efetuado", os.path.join(self.dir_login, "validate-login.png"))
-            self.add_image("msg-aguardando", os.path.join(self.dir_baixa, "msg-aguardando.png"))
-            self.add_image("msg-erro-data", os.path.join(self.dir_baixa, "msg-erro-data.png"))
-            self.add_image("msg-falha-comunicacao", self.dir_baixa + "/msg-falha-comunicacao-servidor.png")
-            self.add_image("msg-nao-existe-procuracao", self.dir_baixa + "/msg-nao-existe-procuracao.png")
-            self.add_image("msg-procuracao-vencida", self.dir_baixa + "/msg-procuracao-vencida.png")
-            self.add_image("pop-up-error", self.dir_pop_ups + "/erro.png")
-            self.add_image("pop-up-nao-encontrado", self.dir_pop_ups + "/nao-encontrado.png")
-            self.add_image("pop-up-pedido", self.dir_pop_ups + "/pedido.png")
-            self.add_image("popup-nenhum-arquivo", self.dir_pop_ups + "/nenhum-arquivo.png")
-            self.add_image("procurador-pf", self.dir_login + "/procurador-pf.png")
-            self.add_image("procurador-pj", self.dir_login + "/procurador-pj.png")
-            self.add_image("resultado-pesquisa", self.dir_baixa + "/resultado-pesquisa.png")
-            self.add_image("selecionar-procurador", self.dir_login + "/combobox-procurador.png")
-            self.add_image("validacao-periodo-contabil", self.dir_combobox_periodo + "/validacao-periodo-contabil.png")
-            self.add_image("validacao-periodo-fiscal", self.dir_combobox_periodo + "/validacao-periodo-fiscal.png")
-            self.add_image("verificar-pedidos", self.dir_baixa + "/verificar-pedidos.png")
-        except Exception as e:
-            raise Exception(f"[FALHA AO CARREGAR IMAGENS]: {e}")
+            mappings = [
+                ("atualizar-lista", self.dir_login, "atualizar-lista.png"),
+                ("box-buscar-todos", self.dir_sped_fiscal, "box-buscar-todos.png"),
+                ("box-ultimo-arquivo", self.dir_sped_fiscal, "box-ultimo-arquivo.png"),
+                ("button-pesquisar", self.dir_baixa, "button-pesquisar.png"),
+                ("button-solicitar-arquivos-marcados", self.dir_baixa, "button-solicitar-arquivos-marcados.png"),
+                ("combobox-dados-agregados", self.dir_combobox_arquivo, "dados-agregados-escrituracao.png"),
+                ("combobox-entrega", self.dir_combobox_periodo, "periodo-de-entrega.png"),
+                ("combobox-entrega-da-incorporada", self.dir_combobox_periodo, "periodo-de-entrega-da-incorporada.png"),
+                ("combobox-escrituracao", self.dir_combobox_arquivo, "escrituracao.png"),
+                ("combobox-escrituracao-contabil-digital", self.dir_combobox_arquivo, "escrituracao-contabil-digital.png"),
+                ("combobox-escrituracao-da-incorporada", self.dir_combobox_periodo, "periodo-de-escrituracao-da-incorporada.png"),
+                ("combobox-escrituracao-fiscal", self.dir_combobox_arquivo, "escrituracao-fiscal.png"),
+                ("combobox-perfil", self.dir_login, "combobox-contribuinte.png"),
+                ("combobox-periodo-escrituracao", self.dir_combobox_periodo, "periodo-escrituracao.png"),
+                ("combobox-periodo-entrega", self.dir_combobox_periodo, "periodo-de-entrega.png"),
+                ("combobox-sped-contabil", self.dir_combobox_sistema, "contabil.png"),
+                ("combobox-sped-contribuicoes", self.dir_combobox_sistema, "contribuicoes.png"),
+                ("combobox-sped-ecf", self.dir_combobox_sistema, "ecf.png"),
+                ("combobox-sped-fiscal", self.dir_combobox_sistema, "fiscal.png"),
+                ("combobox-termos-junta-comercial", self.dir_combobox_arquivo, "termos-junta-comercial.png"),
+                ("combobox-validacao-escrituracao", self.dir_combobox_arquivo, "validacao-escrituracao.png"),
+                ("fim-download", self.dir_baixa, "fim-download.png"),
+                ("icon-acompanhamento", self.dir_baixa, "icon-acompanhamento.png"),
+                ("icon-marcar", self.dir_baixa, "icon-marcar.png"),
+                ("icon-pesquisa", self.dir_baixa, "icon-pesquisa.png"),
+                ("input-cnjp", self.dir_sped_fiscal, "input-cnpj.png"),
+                ("input-data-fim", self.dir_baixa, "data-fim.png"),
+                ("input-data-fim-fiscal", self.dir_sped_fiscal, "input-data-fim.png"),
+                ("input-data-fim-incorporada", self.dir_baixa, "data-fim-incorporada.png"),
+                ("input-data-inicio", self.dir_baixa, "data-inicio.png"),
+                ("input-data-inicio-fiscal", self.dir_sped_fiscal, "input-data-inicio.png"),
+                ("input-data-inicio-incorporada", self.dir_baixa, "data-inicio-incorporada.png"),
+                ("input-pf", self.dir_login, "input-cpf.png"),
+                ("input-pj", self.dir_login, "input-cnpj.png"),
+                ("input-procurador", self.dir_baixa, "cnpj-incorporada.png"),
+                ("login-efetuado", self.dir_login, "validate-login.png"),
+                ("msg-aguardando", self.dir_baixa, "msg-aguardando.png"),
+                ("msg-erro-data", self.dir_baixa, "msg-erro-data.png"),
+                ("msg-falha-comunicacao", self.dir_baixa, "msg-falha-comunicacao-servidor.png"),
+                ("msg-nao-existe-procuracao", self.dir_baixa, "msg-nao-existe-procuracao.png"),
+                ("msg-procuracao-vencida", self.dir_baixa, "msg-procuracao-vencida.png"),
+                ("pop-up-error", self.dir_pop_ups, "erro.png"),
+                ("pop-up-nao-encontrado", self.dir_pop_ups, "nao-encontrado.png"),
+                ("pop-up-pedido", self.dir_pop_ups, "pedido.png"),
+                ("popup-nenhum-arquivo", self.dir_pop_ups, "nenhum-arquivo.png"),
+                ("procurador-pf", self.dir_login, "procurador-pf.png"),
+                ("procurador-pj", self.dir_login, "procurador-pj.png"),
+                ("resultado-pesquisa", self.dir_baixa, "resultado-pesquisa.png"),
+                ("selecionar-procurador", self.dir_login, "combobox-procurador.png"),
+                ("validacao-periodo-contabil", self.dir_combobox_periodo, "validacao-periodo-contabil.png"),
+                ("validacao-periodo-fiscal", self.dir_combobox_periodo, "validacao-periodo-fiscal.png"),
+                ("verificar-pedidos", self.dir_baixa, "verificar-pedidos.png"),
+            ]
+
+            for identifier, directory, filename in mappings:
+                self.add_image(identifier, os.path.join(directory, filename))
+        except Exception as exc:  # pylint: disable=broad-except
+            self._raise_runtime_error("Falha ao carregar imagens.", exc)
 
     def verificar_popup(self, nome_popup, acao, log_msg, status, resultado):
         """
@@ -147,12 +166,12 @@ class ReceitaNetBx(DesktopBot):
             resultado (str): Resultado da operação.
         """
         if not self.found.is_set() and self.find(nome_popup, matching=0.8):
-            with threading.Lock():
+            with self._popup_lock:
                 if not self.found.is_set():  # Verifica novamente para evitar condições de corrida
                     self.click()
                     self.enter()
                     logging.info(log_msg)
-                    self.result = acao
+                    self.result = {"acao": acao, "status": status, "resultado": resultado}
                     self.found.set()  # Sinaliza que uma condição foi satisfeita
 
     def login(self, contribuinte):
@@ -164,7 +183,7 @@ class ReceitaNetBx(DesktopBot):
         """
         max_tentativas = 4
         logging.info("* INICIANDO A FUNÇÃO -> LOGIN CERTIFICADO <- *")
-        for attempt_count in range(1, max_tentativas + 1):
+        for _attempt in range(1, max_tentativas + 1):
             try:
                 self.abrir_aplicativo()
                 self.load_images()
@@ -199,11 +218,11 @@ class ReceitaNetBx(DesktopBot):
                     self.fechar_aplicativo()
                     time.sleep(5)
             except Exception as e:
-                logging.warning(f"Erro ao logar no Receitanet BX: {e}")
+                logging.warning("Erro ao logar no Receitanet BX: %s", e)
                 self.fechar_aplicativo()
                 time.sleep(5)
         else:
-            raise Exception("[FALHA]: Ocorreu um erro ao tentar logar com o certificado A1")
+            raise RuntimeError("[FALHA]: Ocorreu um erro ao tentar logar com o certificado A1")
 
     def selecionar_sistema(self, sistema, sistema_Anterior=None):
         """
@@ -227,10 +246,10 @@ class ReceitaNetBx(DesktopBot):
                     self.click_image(sistema_Anterior)
                     self.click_image(sistema)
                 else:
-                    raise Exception(f"Erro ao selecionar o sistema: {sistema}")
-            logging.info(f"Sistema selecionado: {sistema}")
+                    raise RuntimeError(f"Erro ao selecionar o sistema: {sistema}")
+            logging.info("Sistema selecionado: %s", sistema)
         except Exception as e:
-            raise Exception(f"[FALHA]: Ao selecionar o sistema: {e}")
+            self._raise_runtime_error("[FALHA]: Ao selecionar o sistema.", e)
 
     def selecionar_arquivo(self, tipo_Arquivo, validacao=None, tipo_Arquivo_Anterior=None):
         """
@@ -255,10 +274,10 @@ class ReceitaNetBx(DesktopBot):
                     self.click_image(tipo_Arquivo_Anterior)
                     self.click_image(tipo_Arquivo)
                 else:
-                    raise Exception(f"Erro ao selecionar o tipo de arquivo: {tipo_Arquivo}")
-            logging.info(f"Tipo de arquivo selecionado: {tipo_Arquivo}")
+                    raise RuntimeError(f"Erro ao selecionar o tipo de arquivo: {tipo_Arquivo}")
+            logging.info("Tipo de arquivo selecionado: %s", tipo_Arquivo)
         except Exception as e:
-            raise Exception(f"[FALHA]: Ao selecionar o tipo de arquivo: {e}")
+            self._raise_runtime_error("[FALHA]: Ao selecionar o tipo de arquivo.", e)
 
     def selecionar_periodo(self, periodo, periodo_Anterior=None):
         """
@@ -270,7 +289,7 @@ class ReceitaNetBx(DesktopBot):
         """
         try:
             self.load_images()
-            logging.info(f"Selecionando o periodo: {periodo}")
+            logging.info("Selecionando o periodo: %s", periodo)
             if self.validate_list_exists(path=self.dir_selecione_periodo):
                 self.find_click_list_image(path=self.dir_selecione_periodo)
                 self.click_image(periodo)
@@ -281,9 +300,9 @@ class ReceitaNetBx(DesktopBot):
                     self.click_image(periodo_Anterior, confidence=0.8)
                     self.click_image(periodo, confidence=0.8)
                 else:
-                    raise Exception(f"Erro ao selecionar o periodo: {periodo}")
+                    raise RuntimeError(f"Erro ao selecionar o periodo: {periodo}")
         except Exception as e:
-            raise Exception(f"[FALHA]: Ao selecionar o periodo: {e}")
+            self._raise_runtime_error("[FALHA]: Ao selecionar o periodo.", e)
 
     def mudar_tela_pesquisa(self):
         """
@@ -295,8 +314,9 @@ class ReceitaNetBx(DesktopBot):
             self.find("icon-pesquisa", matching=0.9)
             self.click()
             self.double_click()
-        except Exception as e:
-            raise (logging.warning(f"Erro ao trocar para pesquisar: {e}"))
+        except Exception as exc:
+            logging.error("Erro ao trocar para pesquisar: %s", exc)
+            raise RuntimeError("Falha ao alternar para a aba de pesquisa.") from exc
 
     def input_data(self, primeiro_dia, ultimo_dia):
         """
@@ -322,12 +342,12 @@ class ReceitaNetBx(DesktopBot):
                     self.type_key(ultimo_dia)
                     self.enter()
                 else:
-                    raise Exception(f"Erro ao inserir a data final: {ultimo_dia}")
+                    raise RuntimeError(f"Erro ao inserir a data final: {ultimo_dia}")
             else:
-                raise Exception(f"Erro ao inserir a data inicial: {primeiro_dia}")
+                raise RuntimeError(f"Erro ao inserir a data inicial: {primeiro_dia}")
             logging.info("* INPUT DATA EFETUADO COM SUCESSO")
         except Exception as e:
-            raise Exception(f"[FALHA]: Ao inserir a data: {e}")
+            self._raise_runtime_error("[FALHA]: Ao inserir a data.", e)
 
     def input_incorporada(self, primeiro_dia, ultimo_dia, contribuinte):
         """
@@ -359,7 +379,7 @@ class ReceitaNetBx(DesktopBot):
             self.enter()
             logging.info("* INPUT DOS DADOS DA INCORPORADA FINALIZADO! *")
         except Exception as e:
-            raise Exception(f"[FALHA]: Ao inserir os dados da incorporada: {e}")
+            self._raise_runtime_error("[FALHA]: Ao inserir os dados da incorporada.", e)
 
     def input_campos_fiscais(self, primeiro_dia, ultimo_dia):
         """
@@ -395,13 +415,13 @@ class ReceitaNetBx(DesktopBot):
                         else:
                             logging.warning("Não foi encontrado o box -> Último Arquivo Transmitido <-")
                     else:
-                        raise Exception(f"Erro ao inserir a data final: {ultimo_dia}")
+                        raise RuntimeError(f"Erro ao inserir a data final: {ultimo_dia}")
                 else:
-                    raise Exception(f"Erro ao inserir a data inicial: {primeiro_dia}")
+                    raise RuntimeError(f"Erro ao inserir a data inicial: {primeiro_dia}")
             else:
-                raise Exception(f"Erro ao clicar no box -> Buscar Arquivos de Todos os Estabelecimentos <-")
+                raise RuntimeError("Erro ao clicar no box -> Buscar Arquivos de Todos os Estabelecimentos <-")
         except Exception as e:
-            raise Exception(f"[FALHA]: Ao inserir os dados: {e}")
+            self._raise_runtime_error("[FALHA]: Ao inserir os dados.", e)
 
     def validar_solicitacao(self):
         """
@@ -440,10 +460,9 @@ class ReceitaNetBx(DesktopBot):
 
             if self.found.is_set():
                 return self.result
-            else:
-                raise Exception("Nenhuma condição de popup foi satisfeita")
+            raise RuntimeError("Nenhuma condição de popup foi satisfeita")
         except Exception as e:
-            raise Exception(f"Erro ao validar a solicitação: {e}")
+            self._raise_runtime_error("Erro ao validar a solicitação.", e)
 
     def baixar_arquivos(self):
         """
@@ -470,7 +489,7 @@ class ReceitaNetBx(DesktopBot):
                     logging.info("Download Finalizado")
                     break
         except Exception as e:
-            raise Exception(f"[FALHA]: Ao baixar os arquivos: {e}")
+            self._raise_runtime_error("[FALHA]: Ao baixar os arquivos.", e)
 
     def _to_datetime(self, date_str, time_str):
         """
@@ -497,6 +516,7 @@ class ReceitaNetBx(DesktopBot):
         """
         arquivos_recentes_por_periodo = {}
         for arquivo in self.dir_docs.rglob("*.txt"):
+            transmissao_dia = transmissao_hora = periodo = None
             if "Contribuições" in tipo:
                 itens = arquivo.stem.split("_")
                 periodo = f"{itens[1][4:6]}/{itens[1][:4]}"
@@ -507,6 +527,11 @@ class ReceitaNetBx(DesktopBot):
                 transmissao_dia = f"{itens[4][6:8]}/{itens[4][4:6]}/{itens[4][:4]}"
                 transmissao_hora = f"{itens[4][8:10]}:{itens[4][10:12]}:{itens[4][12:14]}"
                 periodo = f"{itens[3][4:6]}/{itens[3][:4]}"
+            else:
+                continue
+
+            if not all([transmissao_dia, transmissao_hora, periodo]):
+                continue
 
             data_hora_atual = self._to_datetime(transmissao_dia, transmissao_hora)
 
@@ -538,4 +563,4 @@ class ReceitaNetBx(DesktopBot):
                         shutil.move(arquivo, diretorio / arquivo.name)
             logging.info("* ARQUIVOS MOVIDOS COM SUCESSO *")
         except Exception as e:
-            raise Exception(f"[FALHA]: Ao manipular os arquivos: {e}")
+            self._raise_runtime_error("[FALHA]: Ao manipular os arquivos.", e)
