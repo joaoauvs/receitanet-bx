@@ -30,8 +30,13 @@ class Bot(DesktopBot):
         self.contribuinte = contribuinte
         self.data_inicial = data_inicial
         self.data_final = data_final
-        self.dir_docs = path.expanduser("~") + "/Documents/Arquivos ReceitanetBX"
-        self.sped = Sped(contribuinte=self.contribuinte, data_inicial=self.data_inicial, data_final=self.data_final)
+        home = path.expanduser("~")
+        self.dir_docs = f"{home}/Documents/Arquivos ReceitanetBX"
+        self.sped = Sped(
+            contribuinte=self.contribuinte,
+            data_inicial=self.data_inicial,
+            data_final=self.data_final
+        )
         self.sistemas = {
             "sped contribuicoes": self.sped.download_sped_contribuicoes,
             "sped contabil": self.sped.download_sped_contabil,
@@ -63,8 +68,15 @@ class Bot(DesktopBot):
         receitanet = ReceitaNetBx()
         try:
             File.delete_files_and_subdirectories(self.dir_docs)
-            if not Validar.is_start_date_greater_than_end_date(self.data_inicial, self.data_final):
-                logging.warning("Periodo informado invalido: %s > %s", self.data_inicial, self.data_final)
+            is_valid = Validar.is_start_date_greater_than_end_date(
+                self.data_inicial, self.data_final
+            )
+            if not is_valid:
+                logging.warning(
+                    "Periodo informado invalido: %s > %s",
+                    self.data_inicial,
+                    self.data_final
+                )
                 return
             sistema_key = self._normalize_system_name(self.sistema)
             handler = self.sistemas.get(sistema_key)
@@ -96,16 +108,38 @@ if __name__ == "__main__":
         sistema = mensagem.get("Sistema") or mensagem.get("sistema")
 
         if cnpj := Validar.validar_cnpj(cnpj_value):
-            data_inicial_raw = mensagem.get("DataInicial") if mensagem.get("DataInicial") is not None else mensagem.get("datainicial")
-            data_final_raw = mensagem.get("DataFinal") if mensagem.get("DataFinal") is not None else mensagem.get("datafinal")
+            data_inicial_raw = (
+                mensagem.get("DataInicial")
+                if mensagem.get("DataInicial") is not None
+                else mensagem.get("datainicial")
+            )
+            data_final_raw = (
+                mensagem.get("DataFinal")
+                if mensagem.get("DataFinal") is not None
+                else mensagem.get("datafinal")
+            )
             data_inicial = Data.formatar_data(data_inicial_raw)
             data_final = Data.formatar_data(data_final_raw)
 
             if not data_inicial or not data_final:
-                logging.warning("Datas invalidas fornecidas: %s - %s", data_inicial_raw, data_final_raw)
+                logging.warning(
+                    "Datas invalidas fornecidas: %s - %s",
+                    data_inicial_raw,
+                    data_final_raw
+                )
             else:
-                Bot(sistema=sistema, contribuinte=cnpj, data_inicial=data_inicial, data_final=data_final).main()
+                bot = Bot(
+                    sistema=sistema,
+                    contribuinte=cnpj,
+                    data_inicial=data_inicial,
+                    data_final=data_final
+                )
+                bot.main()
         else:
             logging.warning("CNPJ invalido fornecido")
     except Exception as e:
-        logging.error("[FALHA AO INICIAR O BOT]: %s - %s", type(e).__name__, str(e))
+        logging.error(
+            "[FALHA AO INICIAR O BOT]: %s - %s",
+            type(e).__name__,
+            str(e)
+        )

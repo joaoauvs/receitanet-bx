@@ -285,9 +285,13 @@ class DesktopBot(BaseBot):
             except Exception as e:
                 logging.error(f"Erro ao procurar elemento: {e}")
                 raise Exception(f"Erro ao procurar elemento: {e}")
-        
-        logging.error(f"Falha ao encontrar a imagem, {identifier} não encontrado após {tempo} segundos.")
-        raise FileNotFoundError(f"Falha ao encontrar a imagem, {identifier} não encontrado após {tempo} segundos.")
+
+        logging.error(
+            f"Falha ao encontrar a imagem, {identifier} não encontrado após {tempo} segundos."
+        )
+        raise FileNotFoundError(
+            f"Falha ao encontrar a imagem, {identifier} não encontrado após {tempo} segundos."
+        )
 
     def find_click_list_image(self, path, match=0.90, max_attempts=4):
         tentativas = 0
@@ -332,7 +336,9 @@ class DesktopBot(BaseBot):
                 continue  # Continue tentando até que o tempo acabe
             except Exception as e:
                 raise Exception(f"Erro ao procurar elemento: {e}")
-        raise FileNotFoundError(f"Falha ao encontrar a imagem, {path} não encontrado após {tempo} segundos.")
+        raise FileNotFoundError(
+            f"Falha ao encontrar a imagem, {path} não encontrado após {tempo} segundos."
+        )
 
     def click_image(self, identifier, confidence=0.97):
         if self.find(identifier, matching=confidence):
@@ -1155,7 +1161,7 @@ class DesktopBot(BaseBot):
 
         Args:
             text (str): text to be typed.
-            interval (int, optional): interval (ms) between each key press. Defaults to 0
+            interval (int, optional): interval (ms) between key press. Defaults to 0
 
         """
         self.kb_type(text=text, interval=interval / 1000.0)
@@ -1166,7 +1172,7 @@ class DesktopBot(BaseBot):
 
         Args:
             text (str): text to be typed.
-            interval (int, optional): interval (ms) between each key press. Defaults to 0
+            interval (int, optional): interval (ms) between key press. Defaults to 0
 
         """
         self.control_a()
@@ -1829,7 +1835,7 @@ class DesktopBot(BaseBot):
                 if window:
                     ctypes.windll.user32.SwitchToThisWindow(window, True)
                     return True
-            except:
+            except Exception:
                 continue
             counter += 1
             time.sleep(1)
@@ -1840,9 +1846,9 @@ class DesktopBot(BaseBot):
     def execute(self, file_path):
         try:
             """
-                Invoca o manipulador do sistema para abrir o arquivo fornecido.
-                Args:
-                    file_path (str): O caminho para o arquivo a ser executado
+            Invoca o manipulador do sistema para abrir o arquivo fornecido.
+            Args:
+                file_path (str): O caminho para o arquivo a ser executado
             """
             if platform.system() == "Windows":
                 os.startfile(file_path)
@@ -1914,7 +1920,7 @@ class DesktopBot(BaseBot):
     @if_app_connected
     def find_app_window(self, waiting_time=10000, **selectors) -> "WindowSpecification":
         """
-        Find a window of the currently connected application using the available selectors.
+        Find window of the connected application using available selectors.
 
         Args:
             waiting_time (int, optional): Maximum wait time (ms) to search for a hit.
@@ -1937,11 +1943,11 @@ class DesktopBot(BaseBot):
         **selectors,
     ) -> "WindowSpecification":
         """
-        Find a element of the currently connected application using the available selectors.
+        Find element of the connected application using available selectors.
         You can pass the context window where the element is contained.
 
         Args:
-            from_parent_window (WindowSpecification, optional): The element's parent window.
+            from_parent_window (WindowSpecification, optional): Element parent window.
             waiting_time (int, optional): Maximum wait time (ms) to search for a hit.
                 Defaults to 10000ms (10s).
             **selectors: Attributes that can be used to filter an element.

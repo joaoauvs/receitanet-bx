@@ -1,7 +1,6 @@
 import locale
 import os
 import platform
-from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
@@ -43,6 +42,7 @@ class ExecutionMode(Enum):
     PRODUCTION = "production"
     DEVELOP = "develop"
     TEST = "test"
+
 
 class Settings:
     """

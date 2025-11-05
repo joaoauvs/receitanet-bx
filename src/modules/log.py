@@ -30,7 +30,13 @@ class LogManager:
     DEFAULT_DATE_FORMAT = "%d/%m/%Y %H:%M:%S"
     DEFAULT_LEVEL = logging.INFO
 
-    def __init__(self, path: str = "logs", level: int = DEFAULT_LEVEL, file_mode: str = "a", encoding: str = "utf-8") -> None:
+    def __init__(
+        self,
+        path: str = "logs",
+        level: int = DEFAULT_LEVEL,
+        file_mode: str = "a",
+        encoding: str = "utf-8",
+    ) -> None:
         """Inicializa o gerenciador de logs.
 
         Args:
@@ -70,12 +76,21 @@ class LogManager:
                 logging.root.removeHandler(handler)
 
             # Configura o logging
-            logging.basicConfig(filename=str(self.log_path), filemode=self._file_mode, encoding=self._encoding, level=self._level, format=self.DEFAULT_FORMAT, datefmt=self.DEFAULT_DATE_FORMAT, style="{")
+            logging.basicConfig(
+                filename=str(self.log_path),
+                filemode=self._file_mode,
+                encoding=self._encoding,
+                level=self._level,
+                format=self.DEFAULT_FORMAT,
+                datefmt=self.DEFAULT_DATE_FORMAT,
+                style="{",
+            )
 
             logging.info(f"Sistema de log iniciado - Arquivo: {self.log_path}")
 
         except OSError as e:
-            raise OSError(f"Erro ao criar diretório de log '{self.log_dir}': {e}") from e
+            msg = f"Erro ao criar diretório de log '{self.log_dir}': {e}"
+            raise OSError(msg) from e
         except Exception as e:
             raise RuntimeError(f"Erro ao configurar sistema de log: {e}") from e
 
@@ -91,9 +106,11 @@ class LogManager:
                 self.log_path.unlink()
                 logging.info(f"Arquivo de log removido: {self.log_path}")
             else:
-                raise FileNotFoundError(f"Arquivo de log não encontrado: {self.log_path}")
+                msg = f"Arquivo de log não encontrado: {self.log_path}"
+                raise FileNotFoundError(msg)
         except OSError as e:
-            raise OSError(f"Erro ao deletar arquivo de log '{self.log_path}': {e}") from e
+            msg = f"Erro ao deletar arquivo de log '{self.log_path}': {e}"
+            raise OSError(msg) from e
 
     def delete_old_logs(self, days: int = 30) -> int:
         """Remove arquivos de log mais antigos que o número de dias especificado.
@@ -116,13 +133,15 @@ class LogManager:
         try:
             for log_file in self.log_dir.glob("*.log"):
                 if log_file.is_file():
-                    file_age = current_time - datetime.fromtimestamp(log_file.stat().st_mtime)
+                    file_mtime = datetime.fromtimestamp(log_file.stat().st_mtime)
+                    file_age = current_time - file_mtime
                     if file_age.days > days:
                         log_file.unlink()
                         removed_count += 1
                         logging.info(f"Log antigo removido: {log_file.name}")
 
-            logging.info(f"Limpeza de logs concluída: {removed_count} arquivo(s) removido(s)")
+            msg = f"Limpeza de logs concluída: {removed_count} removido(s)"
+            logging.info(msg)
             return removed_count
 
         except OSError as e:
@@ -141,7 +160,9 @@ class LogManager:
 
     def __repr__(self) -> str:
         """Representação em string do objeto LogManager."""
-        return f"LogManager(path='{self.log_dir}', filename='{self.filename}')"
+        path = self.log_dir
+        filename = self.filename
+        return f"LogManager(path='{path}', filename='{filename}')"
 
 
 # Mantém compatibilidade com código legado

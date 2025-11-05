@@ -6,7 +6,9 @@ from .utils import Backend
 from .. import config
 
 
-def connect(backend=Backend.WIN_32, timeout=60000, **connection_selectors) -> Application:
+def connect(
+    backend=Backend.WIN_32, timeout=60000, **connection_selectors
+) -> Application:
     """
     Connects to an instance of an open application.
     Use this method to be able to access application windows and elements.
@@ -36,10 +38,12 @@ def connect(backend=Backend.WIN_32, timeout=60000, **connection_selectors) -> Ap
             return app
         except Exception as e:
             connect_exception = e
-            time.sleep(config.DEFAULT_SLEEP_AFTER_ACTION/1000.0)
+            time.sleep(config.DEFAULT_SLEEP_AFTER_ACTION / 1000.0)
 
 
-def find_window(app: Application, waiting_time=10000, **selectors) -> WindowSpecification:
+def find_window(
+    app: Application, waiting_time=10000, **selectors
+) -> WindowSpecification:
     """
     Find a window of the currently connected application using the available selectors.
 
@@ -56,14 +60,18 @@ def find_window(app: Application, waiting_time=10000, **selectors) -> WindowSpec
     """
     try:
         dialog = app.window(**selectors)
-        dialog.wait(wait_for='exists ready', timeout=waiting_time / 1000.0)
+        dialog.wait(wait_for="exists ready", timeout=waiting_time / 1000.0)
         return dialog
     except (TimeoutError, ElementNotFoundError):
         return None
 
 
-def find_element(app: Application, from_parent_window: WindowSpecification = None,
-                 waiting_time=10000, **selectors) -> WindowSpecification:
+def find_element(
+    app: Application,
+    from_parent_window: WindowSpecification = None,
+    waiting_time=10000,
+    **selectors
+) -> WindowSpecification:
     """
     Find a element of the currently connected application using the available selectors.
     You can pass the context window where the element is contained.
@@ -85,7 +93,7 @@ def find_element(app: Application, from_parent_window: WindowSpecification = Non
             element = find_window(app, waiting_time, **selectors)
         else:
             element = from_parent_window.child_window(**selectors)
-            element.wait(wait_for='exists ready', timeout=waiting_time / 1000.0)
+            element.wait(wait_for="exists ready", timeout=waiting_time / 1000.0)
         return element
     except (TimeoutError, ElementNotFoundError):
         return None

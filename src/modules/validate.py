@@ -83,7 +83,10 @@ class Validar:
         if any(cnpj_limpo.count(str(i)) == 14 for i in range(10)):
             return False
 
-        if _generate_first_digit(cnpj_limpo) == cnpj_limpo[12] and _generate_second_digit(cnpj_limpo) == cnpj_limpo[13]:
+        if (
+            _generate_first_digit(cnpj_limpo) == cnpj_limpo[12]
+            and _generate_second_digit(cnpj_limpo) == cnpj_limpo[13]
+        ):
             return cnpj_limpo
         return False
 

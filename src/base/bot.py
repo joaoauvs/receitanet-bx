@@ -42,8 +42,9 @@ class BaseBot:
             str: Absolute path to the resource folder.
         """
         # This checks if this is a pyinstaller binary
-        # More info here: https://pyinstaller.org/en/stable/runtime-information.html#run-time-information
-        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        # More info here:
+        # https://pyinstaller.org/en/stable/runtime-information.html#run-time-information
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
             klass_name = self.__class__.__name__
             res_path = os.path.join(sys._MEIPASS, klass_name, "resources")
         else:
@@ -74,8 +75,9 @@ class BaseBot:
         locations = []
 
         # This checks if this is a pyinstaller binary
-        # More info here: https://pyinstaller.org/en/stable/runtime-information.html#run-time-information
-        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        # More info here:
+        # https://pyinstaller.org/en/stable/runtime-information.html#run-time-information
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
 
             # "resources" folder at sys._MEIPASS/<package>/
             locations.append(self.get_resource_abspath(""))
@@ -141,6 +143,7 @@ class BaseBot:
         """
         try:
             from botcity.maestro import BotExecution, BotMaestroSDK
+
             maestro_available = True
         except ImportError:
             maestro_available = False
@@ -160,7 +163,9 @@ class BaseBot:
                 execution = BotExecution(server, task_id, token, parameters)
                 bot.execution = execution
             else:
-                raise RuntimeError("Your setup is missing the botcity-maestro-sdk package. "
-                                   "Please install it with: pip install botcity-maestro-sdk")
+                raise RuntimeError(
+                    "Your setup is missing the botcity-maestro-sdk package. "
+                    "Please install it with: pip install botcity-maestro-sdk"
+                )
 
         bot.action(execution)

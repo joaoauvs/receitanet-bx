@@ -21,7 +21,7 @@ def is_retina():
         )
         output = proc.stdout.decode("utf-8")
 
-        displays_data = output[output.rfind("Displays:") :]
+        displays_data = output[output.rfind("Displays:"):]
         displays = yaml.safe_load(displays_data).get("Displays", {})
         for _, d in displays.items():
             if d.get("Main Display", False):
