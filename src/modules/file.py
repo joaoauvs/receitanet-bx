@@ -53,10 +53,11 @@ class File:
                     source_file = os.path.join(source_path, file)
                     shutil.move(source_file, destination_path)
         except Exception as e:
-            raise logging.warning(f"Erro: {e}")
+            logging.warning("Erro ao mover arquivos: %s", e)
+            raise
 
     @staticmethod
-    async def clear_folder(source_path):
+    def clear_folder(source_path):
         """
         Deleta todos os arquivos e diretórios dentro do diretório.
 
@@ -74,7 +75,7 @@ class File:
                     elif entry.is_dir():
                         os.rmdir(entry.path)
         except Exception as e:
-            raise Exception(f"Erro ao deletar arquivos: {e}")
+            raise RuntimeError(f"Erro ao deletar arquivos: {e}") from e
 
     @staticmethod
     def delete_files_extension(directory, extension):
@@ -136,6 +137,7 @@ class File:
                     os.rmdir(os.path.join(root, name))
             os.rmdir(directory)
 
+    @staticmethod
     def delete_files_and_subdirectories(directory):
         """
         Deleta arquivos e subpastas, mas não o diretório raiz.

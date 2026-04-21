@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from src.core.bot import DesktopBot
+from src.modules.exceptions import DownloadError, LoginError, UIError
 
 
 class ReceitaNetBx(DesktopBot):
@@ -58,15 +59,11 @@ class ReceitaNetBx(DesktopBot):
         self.list_icon_marcar = self.dir_baixa / "icon-marcar"
         self.result: Optional[Dict[str, str]] = None
         self._popup_lock = threading.Lock()
+        self.load_images()
 
     def action(self, execution=None):
         """Método exigido pela classe base (não utilizado diretamente)."""
         raise NotImplementedError("Utilize a classe Bot para orquestrar a automação.")
-
-    @staticmethod
-    def _raise_runtime_error(message: str, error: Exception) -> None:
-        """Encapsula o relançamento de exceções com encadeamento adequado."""
-        raise RuntimeError(message) from error
 
     def abrir_aplicativo(self) -> None:
         """
@@ -77,7 +74,7 @@ class ReceitaNetBx(DesktopBot):
             self.execute(str(self.dir_app))
             self.focus_window_app(self.nome_app)
         except Exception as exc:  # pylint: disable=broad-except
-            self._raise_runtime_error("Erro ao abrir o aplicativo.", exc)
+            raise UIError("Erro ao abrir o aplicativo.") from exc
 
     def fechar_aplicativo(self) -> None:
         """
@@ -87,7 +84,7 @@ class ReceitaNetBx(DesktopBot):
             logging.info("Fechando o aplicativo")
             subprocess.Popen("taskkill /f /im javaw.exe", shell=True)
         except Exception as exc:  # pylint: disable=broad-except
-            self._raise_runtime_error("Erro ao fechar o aplicativo.", exc)
+            raise UIError("Erro ao fechar o aplicativo.") from exc
 
     def load_images(self) -> None:
         """
@@ -236,7 +233,7 @@ class ReceitaNetBx(DesktopBot):
             for identifier, directory, filename in mappings:
                 self.add_image(identifier, str(directory / filename))
         except Exception as exc:  # pylint: disable=broad-except
-            self._raise_runtime_error("Failed to load images.", exc)
+            raise UIError("Falha ao carregar imagens de referência.") from exc
 
     def verificar_popup(
         self,
@@ -323,7 +320,7 @@ class ReceitaNetBx(DesktopBot):
                 self.fechar_aplicativo()
                 time.sleep(5)
         else:
-            raise RuntimeError(
+            raise LoginError(
                 "[FALHA]: Ocorreu um erro ao tentar logar com certificado A1"
             )
 
@@ -339,7 +336,6 @@ class ReceitaNetBx(DesktopBot):
         """
         logging.info("* SELECIONANDO O SISTEMA E O TIPO DE ARQUIVO *")
         try:
-            self.load_images()
             self.mudar_tela_pesquisa()
             if self.validate_list_exists(path=str(self.dir_selecione_sistema)):
                 self.find_click_list_image(path=str(self.dir_selecione_sistema))
@@ -353,10 +349,12 @@ class ReceitaNetBx(DesktopBot):
                     self.click_image(sistema_anterior)
                     self.click_image(sistema)
                 else:
-                    raise RuntimeError(f"Erro ao selecionar sistema: {sistema}")
+                    raise UIError(f"Erro ao selecionar sistema: {sistema}")
             logging.info("Sistema selecionado: %s", sistema)
+        except UIError:
+            raise
         except Exception as e:
-            self._raise_runtime_error("[FALHA]: Ao selecionar o sistema.", e)
+            raise UIError("[FALHA]: Ao selecionar o sistema.") from e
 
     def selecionar_arquivo(
         self,
@@ -374,7 +372,6 @@ class ReceitaNetBx(DesktopBot):
         """
         logging.info("* SELECIONANDO O TIPO DE ARQUIVO *")
         try:
-            self.load_images()
             if self.validate_list_exists(path=str(self.dir_selecione_arquivo)):
                 self.find_click_list_image(path=str(self.dir_selecione_arquivo))
                 self.click_image(tipo_arquivo, confidence=0.8)
@@ -388,12 +385,14 @@ class ReceitaNetBx(DesktopBot):
                     self.click_image(tipo_arquivo_anterior)
                     self.click_image(tipo_arquivo)
                 else:
-                    raise RuntimeError(
+                    raise UIError(
                         f"Erro ao selecionar tipo de arquivo: {tipo_arquivo}"
                     )
             logging.info("Tipo de arquivo selecionado: %s", tipo_arquivo)
+        except UIError:
+            raise
         except Exception as e:
-            self._raise_runtime_error("[FALHA]: Ao selecionar o tipo de arquivo.", e)
+            raise UIError("[FALHA]: Ao selecionar o tipo de arquivo.") from e
 
     def selecionar_periodo(
         self, periodo: str, periodo_anterior: Optional[str] = None
@@ -406,7 +405,6 @@ class ReceitaNetBx(DesktopBot):
             periodo_anterior (Optional[str]): Período anterior ao desejado.
         """
         try:
-            self.load_images()
             logging.info("Selecionando período: %s", periodo)
             if self.validate_list_exists(path=str(self.dir_selecione_periodo)):
                 self.find_click_list_image(path=str(self.dir_selecione_periodo))
@@ -420,23 +418,24 @@ class ReceitaNetBx(DesktopBot):
                     self.click_image(periodo_anterior, confidence=0.8)
                     self.click_image(periodo, confidence=0.8)
                 else:
-                    raise RuntimeError(f"Erro ao selecionar período: {periodo}")
+                    raise UIError(f"Erro ao selecionar período: {periodo}")
+        except UIError:
+            raise
         except Exception as e:
-            self._raise_runtime_error("[FALHA]: Ao selecionar o período.", e)
+            raise UIError("[FALHA]: Ao selecionar o período.") from e
 
     def mudar_tela_pesquisa(self) -> None:
         """
         Muda para a tela de pesquisa.
         """
         try:
-            self.load_images()
             self.wait_window_app(self.nome_app, extension="javaw.exe")
             self.find("icon-pesquisa", matching=0.9)
             self.click()
             self.double_click()
         except Exception as exc:
             logging.error("Erro ao alterar para tela de pesquisa: %s", exc)
-            raise RuntimeError("Falha ao alternar para a aba de pesquisa.") from exc
+            raise UIError("Falha ao alternar para a aba de pesquisa.") from exc
 
     def input_data(self, primeiro_dia: str, ultimo_dia: str) -> None:
         """
@@ -448,7 +447,6 @@ class ReceitaNetBx(DesktopBot):
         """
         logging.info("* INICIANDO A FUNÇÃO -> INPUT DATA <- *")
         try:
-            self.load_images()
             logging.info("Selecionando o Input -> Data Inicio <-")
             if self.validate_exists(identifier="input-data-inicio"):
                 self.double_click()
@@ -462,12 +460,14 @@ class ReceitaNetBx(DesktopBot):
                     self.type_key(ultimo_dia)
                     self.enter()
                 else:
-                    raise RuntimeError(f"Erro ao inserir a data final: {ultimo_dia}")
+                    raise UIError(f"Erro ao inserir a data final: {ultimo_dia}")
             else:
-                raise RuntimeError(f"Erro ao inserir a data inicial: {primeiro_dia}")
+                raise UIError(f"Erro ao inserir a data inicial: {primeiro_dia}")
             logging.info("* INPUT DATA EFETUADO COM SUCESSO")
+        except UIError:
+            raise
         except Exception as e:
-            self._raise_runtime_error("[FALHA]: Ao inserir a data.", e)
+            raise UIError("[FALHA]: Ao inserir a data.") from e
 
     def input_incorporada(
         self, primeiro_dia: str, ultimo_dia: str, contribuinte: str
@@ -482,7 +482,6 @@ class ReceitaNetBx(DesktopBot):
         """
         logging.info("* INICIANDO O INPUT DOS DADOS DA INCORPORADA *")
         try:
-            self.load_images()
             logging.info("Inserindo a Data Inicio")
             logging.info("Inserindo a -> DATA INICIO <-")
             self.validate_exists(identifier="input-data-inicio-incorporada", match=0.8)
@@ -500,10 +499,10 @@ class ReceitaNetBx(DesktopBot):
             self.type_key(contribuinte)
             self.enter()
             logging.info("* INPUT DOS DADOS DA INCORPORADA FINALIZADO! *")
+        except UIError:
+            raise
         except Exception as e:
-            self._raise_runtime_error(
-                "[FALHA]: Ao inserir os dados da incorporada.", e
-            )
+            raise UIError("[FALHA]: Ao inserir os dados da incorporada.") from e
 
     def input_campos_fiscais(self, primeiro_dia: str, ultimo_dia: str) -> None:
         """
@@ -545,25 +544,30 @@ class ReceitaNetBx(DesktopBot):
                                 "Não foi encontrado o box -> Último Arquivo Transmitido <-"
                             )
                     else:
-                        raise RuntimeError(f"Erro ao inserir a data final: {ultimo_dia}")
+                        raise UIError(f"Erro ao inserir a data final: {ultimo_dia}")
                 else:
-                    raise RuntimeError(f"Erro ao inserir a data inicial: {primeiro_dia}")
+                    raise UIError(f"Erro ao inserir a data inicial: {primeiro_dia}")
             else:
-                raise RuntimeError(
+                raise UIError(
                     "Erro ao clicar no box -> Buscar Arquivos de Todos os Estabelecimentos <-"
                 )
+        except UIError:
+            raise
         except Exception as e:
-            self._raise_runtime_error("[FALHA]: Ao inserir os dados.", e)
+            raise UIError("[FALHA]: Ao inserir os dados.") from e
 
     def validar_solicitacao(self) -> Dict[str, str]:
         """
         Valida se a solicitação foi registrada com sucesso.
 
         Returns:
-            Dict[str, str]: Dicionário de resultados se bem-sucedido, gera RuntimeError caso contrário.
+            Dict[str, str]: Dicionário de resultados se bem-sucedido, gera DownloadError caso contrário.
         """
+        # Reseta o estado antes de cada chamada para permitir reutilização da instância.
+        self.found.clear()
+        self.result = None
+
         try:
-            self.load_images()
             while True:
                 if not self.validate_exists(identifier="msg-aguardando"):
                     break
@@ -641,9 +645,11 @@ class ReceitaNetBx(DesktopBot):
 
             if self.found.is_set() and self.result:
                 return self.result
-            raise RuntimeError("Nenhuma condição de popup foi satisfeita")
+            raise DownloadError("Nenhuma condição de popup foi satisfeita")
+        except DownloadError:
+            raise
         except Exception as e:
-            self._raise_runtime_error("Erro ao validar a solicitação.", e)
+            raise DownloadError("Erro ao validar a solicitação.") from e
 
     def baixar_arquivos(self) -> None:
         """
@@ -651,7 +657,6 @@ class ReceitaNetBx(DesktopBot):
         """
         logging.info("* INICIANDO A FUNÇÃO -> BAIXAR ARQUIVOS <- *")
         try:
-            self.load_images()
             logging.info("Selecionando o Icon -> ACOMPANHAMENTO <-")
             self.find_click_image(identifier="icon-acompanhamento", match=0.9)
             # logging.info("Selecionando o Icon -> VER PEDIDOS E ARQUIVOS <-")
@@ -677,8 +682,10 @@ class ReceitaNetBx(DesktopBot):
                 if self.find("fim-download", matching=0.90):
                     logging.info("Download Finalizado")
                     break
+        except DownloadError:
+            raise
         except Exception as e:
-            self._raise_runtime_error("[FALHA]: Ao baixar os arquivos.", e)
+            raise DownloadError("[FALHA]: Ao baixar os arquivos.") from e
 
     def _to_datetime(self, date_str: str, time_str: str) -> datetime:
         """
@@ -766,7 +773,7 @@ class ReceitaNetBx(DesktopBot):
             )
             diretorio.mkdir(parents=True, exist_ok=True)
 
-            if "Contribuições" in tipo or "ECF" in tipo:
+            if "Contribuicoes" in tipo or "ECF" in tipo:
                 arquivos_recentes_por_periodo = self._buscar_arquivos_recentes(tipo)
 
                 for _periodo, (
@@ -782,5 +789,7 @@ class ReceitaNetBx(DesktopBot):
                     if arquivo.is_file():
                         shutil.move(str(arquivo), str(diretorio / arquivo.name))
             logging.info("* ARQUIVOS MOVIDOS COM SUCESSO *")
+        except DownloadError:
+            raise
         except Exception as e:
-            self._raise_runtime_error("[FALHA]: Ao manipular os arquivos.", e)
+            raise DownloadError("[FALHA]: Ao manipular os arquivos.") from e

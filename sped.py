@@ -5,6 +5,8 @@ from typing import Optional
 
 from receitanet import ReceitaNetBx
 from src.core.bot import DesktopBot
+from src.modules.exceptions import DownloadError
+from src.modules.types import SpedType
 
 
 class Sped(DesktopBot):
@@ -104,19 +106,20 @@ class Sped(DesktopBot):
             logging.info("Nenhum arquivo para baixar")
             self.receitanet.validar_solicitacao()
 
-    def _processar_outros_speds(self, tipo: str) -> None:
+    def _processar_outros_speds(self, sped_type: SpedType) -> None:
         """
         Processa o download de arquivos SPED que não são fiscais.
 
         Args:
-            tipo (str): Tipo de arquivo SPED (ECF, Contribuicoes, Contabil).
+            sped_type (SpedType): Tipo de arquivo SPED.
         """
+        tipo = sped_type.label
         self.receitanet.input_data(self.data_inicial, self.data_final)
 
-        if tipo in ["SPED ECF", "SPED Contribuicoes"]:
+        if sped_type in (SpedType.ECF, SpedType.CONTRIBUICOES):
             self._solicitar_arquivos_criterios_acima(tipo)
 
-        if tipo == "SPED Contabil":
+        if sped_type is SpedType.CONTABIL:
             self._pesquisar_e_solicitar_arquivos(tipo)
 
     def _finalizar_processo(self, tipo: str) -> None:
@@ -124,18 +127,16 @@ class Sped(DesktopBot):
         Finaliza o processo de download verificando os resultados.
 
         Args:
-            tipo (str): Tipo de arquivo SPED sendo processado.
+            tipo (str): Label do tipo de arquivo SPED sendo processado.
         """
         try:
             if self.find("resultado-pesquisa", matching=0.9):
                 logging.info("Arquivo encontrado")
                 time.sleep(5)
-                msg = "Validando se existe o marcador no seletor"
-                logging.info(msg)
+                logging.info("Validando se existe o marcador no seletor")
                 self.find_click_list_image(path=str(self.dir_selector_box))
                 time.sleep(10)
-                msg = "Selecionando botão -> SOLICITAR ARQUIVOS MARCADOS <-"
-                logging.info(msg)
+                logging.info("Selecionando botão -> SOLICITAR ARQUIVOS MARCADOS <-")
                 self.click_image("button-solicitar-arquivos-marcados")
                 if self.receitanet.validar_solicitacao():
                     self.receitanet.baixar_arquivos()
@@ -143,12 +144,14 @@ class Sped(DesktopBot):
             else:
                 logging.info("Nenhum arquivo para baixar")
                 self.receitanet.validar_solicitacao()
+        except DownloadError:
+            raise
         except Exception as exc:
-            raise Exception(f"Erro ao baixar {tipo}: {exc}") from exc
+            raise DownloadError(f"Erro ao baixar {tipo}: {exc}") from exc
 
     def process_download(
         self,
-        tipo: str,
+        sped_type: SpedType,
         sistema: str,
         sistema_anterior: Optional[str],
         tipo_arquivo: str,
@@ -160,7 +163,7 @@ class Sped(DesktopBot):
         Processa o download de qualquer modalidade SPED.
 
         Args:
-            tipo (str): Identificador do arquivo (ex: 'SPED Fiscal').
+            sped_type (SpedType): Tipo de SPED a ser baixado.
             sistema (str): Identificador do sistema na interface.
             sistema_anterior (Optional[str]): Sistema anterior para navegação.
             tipo_arquivo (str): Tipo de arquivo a ser selecionado.
@@ -168,6 +171,7 @@ class Sped(DesktopBot):
             periodo (str): Identificador do período.
             periodo_anterior (Optional[str]): Identificador do período anterior, quando necessário.
         """
+        tipo = sped_type.label
         logging.info("* INICIANDO PROCESSO DE DOWNLOAD DO %s *", tipo)
         try:
             self.receitanet.selecionar_sistema(
@@ -180,22 +184,24 @@ class Sped(DesktopBot):
                 periodo=periodo, periodo_anterior=periodo_anterior
             )
 
-            if tipo == "SPED Fiscal":
+            if sped_type is SpedType.FISCAL:
                 self.receitanet.input_campos_fiscais(
                     primeiro_dia=self.data_inicial, ultimo_dia=self.data_final
                 )
                 self._finalizar_processo(tipo)
             else:
-                self._processar_outros_speds(tipo)
+                self._processar_outros_speds(sped_type)
 
             logging.info("* FUNÇÃO %s FINALIZADA *", tipo)
+        except DownloadError:
+            raise
         except Exception as exc:
-            raise Exception(f"Erro ao baixar {tipo}: {exc}") from exc
+            raise DownloadError(f"Erro ao baixar {tipo}: {exc}") from exc
 
     def download_sped_contabil(self) -> None:
         """Realiza o download do SPED Contábil (ECD)."""
         self.process_download(
-            tipo="SPED Contabil",
+            sped_type=SpedType.CONTABIL,
             sistema="combobox-sped-contabil",
             sistema_anterior="combobox-sped-contribuicoes",
             tipo_arquivo="combobox-escrituracao-contabil-digital",
@@ -206,7 +212,7 @@ class Sped(DesktopBot):
     def download_sped_contribuicoes(self) -> None:
         """Realiza o download do SPED Contribuições (EFD Contribuições)."""
         self.process_download(
-            tipo="SPED Contribuicoes",
+            sped_type=SpedType.CONTRIBUICOES,
             sistema="combobox-sped-contribuicoes",
             sistema_anterior=None,
             tipo_arquivo="combobox-escrituracao",
@@ -218,7 +224,7 @@ class Sped(DesktopBot):
     def download_sped_ecf(self) -> None:
         """Realiza o download do SPED ECF (Escrituração Contábil Fiscal)."""
         self.process_download(
-            tipo="SPED ECF",
+            sped_type=SpedType.ECF,
             sistema="combobox-sped-ecf",
             sistema_anterior="combobox-sped-contabil",
             tipo_arquivo="combobox-escrituracao",
@@ -230,11 +236,10 @@ class Sped(DesktopBot):
     def download_sped_fiscal(self) -> None:
         """Realiza o download do SPED Fiscal (EFD ICMS/IPI)."""
         self.process_download(
-            tipo="SPED Fiscal",
+            sped_type=SpedType.FISCAL,
             sistema="combobox-sped-fiscal",
             sistema_anterior="combobox-sped-ecf",
             tipo_arquivo="combobox-escrituracao-fiscal",
             validacao="combobox-escrituracao-fiscal",
             periodo="validacao-periodo-fiscal",
-            periodo_anterior=None,  # Not used in original call but required by signature
         )

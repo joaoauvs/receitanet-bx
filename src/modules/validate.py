@@ -33,24 +33,6 @@ class Validar:
         """
         return [chave for chave, valor in mensagem.items() if not valor]
 
-    def _generate_first_digit(self, doc: Union[str, list]) -> str:
-        """Calcula o primeiro digito verificador do CNPJ."""
-        soma = 0
-        for idx in range(12):
-            soma += int(doc[idx]) * self.weights_first[idx]
-
-        soma %= 11
-        return "0" if soma < 2 else str(11 - soma)
-
-    def _generate_second_digit(self, doc: Union[str, list]) -> str:
-        """Calcula o segundo digito verificador do CNPJ."""
-        soma = 0
-        for idx in range(13):
-            soma += int(doc[idx]) * self.weights_second[idx]
-
-        soma %= 11
-        return "0" if soma < 2 else str(11 - soma)
-
     @staticmethod
     def validar_cnpj(cnpj: str) -> Union[bool, str]:
         """
