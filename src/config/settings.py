@@ -53,3 +53,16 @@ class Settings:
     PROJECT_NAME = PROJECT_ROOT.name
     VERSION = os.getenv("PROJECT_VERSION", "1.0.0")
     LOG_DIR = str(Path(os.getenv("LOG_PATH", PROJECT_ROOT / "logs")).resolve())
+
+    RECEITANET_APP_PATH = os.getenv(
+        "RECEITANET_APP_PATH",
+        "C:/ProgramData/Microsoft/Windows/Start Menu/Programs/Programas RFB/Receitanet BX/Receitanet BX 1.9.24.lnk"
+    )
+    RECEITANET_DOCS_DIR = os.getenv(
+        "RECEITANET_DOCS_DIR",
+        str(Path.home() / "Documents" / "Arquivos ReceitanetBX")
+    )
+    RECEITANET_ONEDRIVE_DIR = os.getenv(
+        "RECEITANET_ONEDRIVE_DIR",
+        str(Path.home() / "OneDrive - Alianzo" / "ReceitaNet-Bx")
+    )

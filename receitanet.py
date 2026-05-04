@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from src.config.settings import Settings
 from src.core.bot import DesktopBot
 from src.modules.exceptions import DownloadError, LoginError, UIError
 
@@ -30,13 +31,9 @@ class ReceitaNetBx(DesktopBot):
         """
         super().__init__()
         self.found = threading.Event()
-        self.dir_docs = Path.home() / "Documents" / "Arquivos ReceitanetBX"
+        self.dir_docs = Path(Settings.RECEITANET_DOCS_DIR)
         self.nome_app = "Receitanet BX"
-        base_path = Path(
-            "C:/ProgramData/Microsoft/Windows/Start Menu/"
-            "Programs/Programas RFB/Receitanet BX"
-        )
-        self.dir_app = base_path / "Receitanet BX 1.9.24.lnk"
+        self.dir_app = Path(Settings.RECEITANET_APP_PATH)
 
         base_dir = Path(__file__).resolve().parent
         resources_dir = base_dir / "src" / "images"
@@ -300,25 +297,25 @@ class ReceitaNetBx(DesktopBot):
                 self.control_a()
                 self.paste(contribuinte)
                 self.tab()
-                time.sleep(3)
+                time.sleep(1)
                 logging.info("Selecionando Botão -> Entrar <-")
                 self.find_click_list_image(
                     path=str(self.list_btn_entrar), match=0.7
                 )
                 logging.info("Validando se o login foi efetuado")
-                time.sleep(5)
-                if self.validate_exists(identifier="login-efetuado", match=0.7):
-                    self.maximize_window()
-                    time.sleep(5)
-                    logging.info("* LOGIN EFETUADO COM SUCESSO")
-                    break
-                else:
+                try:
+                    if self.wait_find_image(identifier="login-efetuado", match=0.7, tempo=30):
+                        self.maximize_window()
+                        time.sleep(1)
+                        logging.info("* LOGIN EFETUADO COM SUCESSO")
+                        break
+                except FileNotFoundError:
                     self.fechar_aplicativo()
-                    time.sleep(5)
+                    time.sleep(2)
             except Exception as e:
                 logging.warning("Erro ao logar no Receitanet BX: %s", e)
                 self.fechar_aplicativo()
-                time.sleep(5)
+                time.sleep(2)
         else:
             raise LoginError(
                 "[FALHA]: Ocorreu um erro ao tentar logar com certificado A1"
@@ -450,13 +447,13 @@ class ReceitaNetBx(DesktopBot):
             logging.info("Selecionando o Input -> Data Inicio <-")
             if self.validate_exists(identifier="input-data-inicio"):
                 self.double_click()
-                time.sleep(2)
+                time.sleep(0.5)
                 self.type_key(primeiro_dia)
                 self.tab()
                 logging.info("Selecionando o Input -> Data Fim <-")
                 if self.validate_exists(identifier="input-data-fim"):
                     self.double_click()
-                    time.sleep(2)
+                    time.sleep(0.5)
                     self.type_key(ultimo_dia)
                     self.enter()
                 else:
@@ -764,13 +761,7 @@ class ReceitaNetBx(DesktopBot):
         """
         logging.info("* INICIANDO A FUNÇÃO -> MANIPULAR ARQUIVOS <- *")
         try:
-            diretorio = (
-                Path.home()
-                / "OneDrive - Alianzo"
-                / "ReceitaNet-Bx"
-                / contribuinte
-                / tipo
-            )
+            diretorio = Path(Settings.RECEITANET_ONEDRIVE_DIR) / contribuinte / tipo
             diretorio.mkdir(parents=True, exist_ok=True)
 
             if "Contribuicoes" in tipo or "ECF" in tipo:
